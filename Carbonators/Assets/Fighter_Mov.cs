@@ -47,4 +47,10 @@ public class Fighter_Mov : MonoBehaviour
         //Recieves a vertical and horizontal speed to move, in the form of a vector 2 or 3
         RB2.velocity = trajectory;
     }
+
+    public void WallMovement(bool onRight)
+    {
+        if (onRight ^ RB2.velocity.x < 0)
+            RB2.velocity = new Vector3(0, RB2.velocity.y);
+    }
 }

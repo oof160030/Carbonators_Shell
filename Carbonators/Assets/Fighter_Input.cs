@@ -14,6 +14,7 @@ public class Fighter_Input : MonoBehaviour
     private float pos_duration;
     private bool facingLeft = true;
     private bool onRight = true;
+    public bool CanBackUp = true;
 
     // Reads player input frame by frame. References the fighter's moves and physics through seperate scripts.
     void Start()
@@ -40,7 +41,18 @@ public class Fighter_Input : MonoBehaviour
             facingLeft = onRight;
         SR.flipX = facingLeft;
 
+        /*Set player movement
+        if(!CanBackUp && ((onRight && x > 0) || (!onRight && x < 0)))
+            F_Mov.Movement_Update(0, y, j);
+        else
+            F_Mov.Movement_Update(x, y, j);
+        */
+
         F_Mov.Movement_Update(x, y, j);
+
+        //Update player movement based on distance from other fighter
+        if (!CanBackUp)
+            F_Mov.WallMovement(onRight);
 
     }
 
@@ -71,6 +83,16 @@ public class Fighter_Input : MonoBehaviour
     public void SetRightBool(bool isOnRight)
     {
         onRight = isOnRight;
+    }
+
+    public bool IsOnRight()
+    {
+        return onRight;
+    }
+
+    public bool IsGrounded()
+    {
+        return F_Mov.grounded;
     }
 
 }
