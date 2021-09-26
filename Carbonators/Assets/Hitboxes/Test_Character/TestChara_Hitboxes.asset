@@ -1,0 +1,17 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 92e35a00c04c1e24ea6e4be6f1342924, type: 3}
+  m_Name: TestChara_Hitboxes
+  m_EditorClassIdentifier: 
+  CharacterID: 0
+  hitbox:
+  - {fileID: 11400000, guid: 3c47397bdba70cd40948ddf2e834c3ae, type: 2}

@@ -45,11 +45,39 @@ public class GameMGR : MonoBehaviour
             firstOnRight = true;
         }
 
-        //If both fighters are grounded and too close, move them away from each other.
-        if(Mathf.Abs(fighter1.transform.position.x - fighter2.transform.position.x) < 2 && fighter1.IsGrounded() && fighter2.IsGrounded())
+        //If both fighters are too far away, don't let them move apart
+        if (Mathf.Abs(fighter1.transform.position.x - fighter2.transform.position.x) > 15)
         {
-            //Check which on is currently closer to the center
-            if(Mathf.Abs(fighter1.transform.position.x) < Mathf.Abs(fighter2.transform.position.x)) //fighter 1 closer
+            fighter1.CanBackUp = false;
+            fighter2.CanBackUp = false;
+        }
+        else
+        {
+            fighter1.CanBackUp = true;
+            fighter2.CanBackUp = true;
+        }
+
+        //If both fighters are grounded and too close, move them away from each other.
+        if (Mathf.Abs(fighter1.transform.position.x - fighter2.transform.position.x) < 2 && fighter1.IsGrounded() && fighter2.IsGrounded())
+        {
+            //If neither fighter is against the wall, move both fighters slightly
+            if(fighter1.CanBackUp && fighter2.CanBackUp)
+            {
+                //Find midpoint between the fighters
+                float midpointX = (fighter1.transform.position.x + fighter2.transform.position.x)/2.0f;
+                if (fighter2.IsOnRight())
+                {
+                    fighter1.transform.position = new Vector3(midpointX,fighter1.transform.position.y) + new Vector3(-1, 0);
+                    fighter2.transform.position = new Vector3(midpointX, fighter1.transform.position.y) + new Vector3(1, 0);
+                }
+                else
+                {
+                    fighter1.transform.position = new Vector3(midpointX, fighter1.transform.position.y) + new Vector3(1, 0);
+                    fighter2.transform.position = new Vector3(midpointX, fighter1.transform.position.y) + new Vector3(-1, 0);
+                }
+            }
+            //If one fighter is against a wall, check which on is currently closer to the center
+            else if(Mathf.Abs(fighter1.transform.position.x) < Mathf.Abs(fighter2.transform.position.x)) //fighter 1 closer
             {
                 //move fighter 1 away from fighter 2
                 if (fighter2.IsOnRight())
@@ -66,17 +94,7 @@ public class GameMGR : MonoBehaviour
                     fighter2.transform.position = fighter1.transform.position + new Vector3(2, 0);
             }
         }
-        //If both fighters are too far away, don't let them move apart
-        if(Mathf.Abs(fighter1.transform.position.x - fighter2.transform.position.x) > 15)
-        {
-            fighter1.CanBackUp = false;
-            fighter2.CanBackUp = false;
-        }
-        else
-        {
-            fighter1.CanBackUp = true;
-            fighter2.CanBackUp = true;
-        }
+        
 
     }
 }

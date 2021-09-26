@@ -14,15 +14,20 @@ public class Cam_Control : MonoBehaviour
         float xDist = Mathf.Abs(fighter1.position.x - fighter2.position.x);
         Cam_Pos.x = Mathf.Clamp((fighter1.position.x + fighter2.position.x)/2.0f,-5.5f,5.5f);
 
+        //Don't allow the camera to be more than 8 units away from either fighter
+
         //If they are closer than 10 units, allow camera to stay still if between the fighters
-        if (xDist < 10)
+        if (xDist < 4)
         {
-            float range = (10 - xDist)/2.0f;
+            float range = (4 - xDist)/2.0f;
+
             Cam_Pos.x = Mathf.Clamp(transform.position.x, Cam_Pos.x - range, Cam_Pos.x + range);
         }
 
         //Set y position to track highest current fighter
         Cam_Pos.y = Mathf.Clamp(Mathf.Max(fighter1.position.y, fighter2.position.y),0,15);
+
+
         transform.position = Cam_Pos;
     }
 }

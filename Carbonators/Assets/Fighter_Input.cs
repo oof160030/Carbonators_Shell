@@ -5,13 +5,22 @@ using UnityEngine;
 public class Fighter_Input : MonoBehaviour
 {
     private Fighter_Mov F_Mov;
+    private Fighter_Attack F_Atk;
     private SpriteRenderer SR;
+    public int PortNumber; //Determines if player 1 or 2 is controlling this character
+    private Animator AR;
 
     //Keycodes
     public KeyCode UP, DOWN, LEFT, RIGHT, A, B, C;
+    //Joystick variables
     public int StickPos, priorStickPos;
     private bool pos_changed;
     private float pos_duration;
+    //Button variables
+    private bool APressed, BPressed, CPressed;
+    private float ADuration, BDuration, CDuration;
+
+    //Positioning Variables
     private bool facingLeft = true;
     private bool onRight = true;
     public bool CanBackUp = true;
@@ -19,8 +28,12 @@ public class Fighter_Input : MonoBehaviour
     // Reads player input frame by frame. References the fighter's moves and physics through seperate scripts.
     void Start()
     {
-        F_Mov = GetComponent<Fighter_Mov>();
         SR = GetComponent<SpriteRenderer>();
+        AR = GetComponent<Animator>();
+        
+        F_Mov = GetComponent<Fighter_Mov>();
+        F_Atk = GetComponent<Fighter_Attack>(); F_Atk.Initialize(PortNumber, this,  AR);
+
         priorStickPos = 5; StickPos = 5;
     }
 
@@ -28,6 +41,7 @@ public class Fighter_Input : MonoBehaviour
     {
         //Get current stick directions
         UpdateStick();
+        UpdateButtons();
 
         //Call movement function
         int x = 0; int y = 0; bool j;
@@ -41,14 +55,11 @@ public class Fighter_Input : MonoBehaviour
             facingLeft = onRight;
         SR.flipX = facingLeft;
 
-        /*Set player movement
-        if(!CanBackUp && ((onRight && x > 0) || (!onRight && x < 0)))
-            F_Mov.Movement_Update(0, y, j);
-        else
-            F_Mov.Movement_Update(x, y, j);
-        */
-
+        //Manually move the player, if they are able to be controlled
         F_Mov.Movement_Update(x, y, j);
+
+        //Check which command inputs, if any, the player has generated
+        F_Atk.CheckMoveList(APressed && ADuration==0);
 
         //Update player movement based on distance from other fighter
         if (!CanBackUp)
@@ -56,6 +67,7 @@ public class Fighter_Input : MonoBehaviour
 
     }
 
+    //Update the fighter's input parameters
     public void UpdateStick()
     {
         //Read player inputs
@@ -76,7 +88,23 @@ public class Fighter_Input : MonoBehaviour
         {
             pos_duration = Mathf.Clamp(pos_duration + Time.deltaTime,0,3);
         }
+    }
+    public void UpdateButtons()
+    {
+        //Increase time buttons have been in the current state, up to 3 seconds
+        ADuration = Mathf.Clamp(ADuration+Time.deltaTime,0,3);
 
+        //Check if a button has just been pressed or released
+        if(Input.GetKeyDown(A))
+        {
+            APressed = true;
+            ADuration = 0;
+        }
+        else if(Input.GetKeyUp(A))
+        {
+            APressed = false;
+            ADuration = 0;
+        }
     }
 
     //Tell the fighter which side they are on
@@ -88,6 +116,11 @@ public class Fighter_Input : MonoBehaviour
     public bool IsOnRight()
     {
         return onRight;
+    }
+
+    public bool IsFacingRight()
+    {
+        return !facingLeft;
     }
 
     public bool IsGrounded()
