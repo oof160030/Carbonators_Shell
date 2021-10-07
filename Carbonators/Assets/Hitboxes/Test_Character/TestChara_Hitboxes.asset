@@ -15,3 +15,4 @@ MonoBehaviour:
   CharacterID: 0
   hitbox:
   - {fileID: 11400000, guid: 3c47397bdba70cd40948ddf2e834c3ae, type: 2}
+  - {fileID: 11400000, guid: 713410469595a444f892f3fccb8d9efe, type: 2}

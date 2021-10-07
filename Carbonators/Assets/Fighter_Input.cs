@@ -6,6 +6,7 @@ public enum FighterState {NEUTRAL, ATTACK, BLOCK, HITSTUN, HITSTOP, TUMBLE, GROU
 public class Fighter_Input : MonoBehaviour
 {
     //The master script for each fighter, responsible for calling all other scripts
+    public GameMGR MGR;
 
     //Fighter State - Referenced to keep track of what the fighter is currently doing and influence if inputs are received.
     private FighterState F_State;
@@ -85,7 +86,7 @@ public class Fighter_Input : MonoBehaviour
             F_Mov.Movement_Update(x, y, j);
 
             //Check which command inputs, if any, the player has generated
-            F_Atk.CheckMoveList(APressed && ADuration == 0);
+            F_Atk.CheckMoveList((APressed && ADuration == 0), (F_Mov.grounded && StickPos < 4));
         }
         F_Mov.Gravity_Update();
 

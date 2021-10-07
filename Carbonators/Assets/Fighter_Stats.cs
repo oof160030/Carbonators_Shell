@@ -6,7 +6,9 @@ public class Fighter_Stats : MonoBehaviour
 {
     //Tracks the various stats of the fighter, including health, shield, and super meter.
     //Displays this data to the UI
-    private float Health, Shield, Meter;
+    [SerializeField]
+    private float Health;
+    private float Shield, Meter;
     private Fighter_Input F_Input;
 
     public void Init(Fighter_Input In)
@@ -19,6 +21,8 @@ public class Fighter_Stats : MonoBehaviour
     public void Take_Damage(float damage)
     {
         Health -= damage;
+
         //Update UI in this step
+        F_Input.MGR.updateHealthUI(F_Input.PortNumber, Health);
     }
 }

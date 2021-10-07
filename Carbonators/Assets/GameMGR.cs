@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using TMPro;
 
 public class GameMGR : MonoBehaviour
 {
@@ -9,6 +10,7 @@ public class GameMGR : MonoBehaviour
 
     Fighter_Input fighter1, fighter2;
     public Cam_Control CC;
+    public TextMeshProUGUI P1_HP, P2_HP;
     void Start()
     {
         //Get access to the two fighters, set their inital positions.
@@ -25,8 +27,12 @@ public class GameMGR : MonoBehaviour
             fighter1 = fighters[1].GetComponent<Fighter_Input>();
             fighter2.SetRightBool(false); fighter1.SetRightBool(true);
         }
+        fighter1.MGR = this; fighter2.MGR = this;
+
         CC.fighter1 = fighter1.transform;
         CC.fighter2 = fighter2.transform;
+
+
     }
 
     // Update is called once per frame
@@ -96,5 +102,13 @@ public class GameMGR : MonoBehaviour
         }
         
 
+    }
+
+    public void updateHealthUI(int port, float health)
+    {
+        if (port == 1)
+            P1_HP.text = "P1: " + health;
+        else
+            P2_HP.text = "P2: " + health;
     }
 }

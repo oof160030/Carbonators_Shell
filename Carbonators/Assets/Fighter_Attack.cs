@@ -13,12 +13,13 @@ public class Fighter_Attack : MonoBehaviour
     private Animator Atk_AR; //The animator tied to the fighter, controls fighting logic to a degree
     
     //References the player's inputs once a button is pressed or released, and activates a move based on the results
-    public void CheckMoveList(bool APress)
+    public void CheckMoveList(bool APress, bool groundDown)
     {
         //
-        if (APress)
+        if (APress && groundDown)
+            Atk_AR.SetTrigger("A_Down_Pressed");
+        else if(APress)
             Atk_AR.SetTrigger("A_Pressed");
-
     }
 
 
