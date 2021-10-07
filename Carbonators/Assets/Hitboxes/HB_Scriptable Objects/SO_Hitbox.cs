@@ -5,6 +5,7 @@ using UnityEngine;
 [CreateAssetMenu(fileName = "HitBox", menuName = "ScriptableObjects/New Hitbox")]
 public class SO_Hitbox : ScriptableObject
 {
+    //All of the information associated with a specific hitbox
     [Tooltip("ID number of this hitbox, referenced by animator. Character specific.")]
     public int IDNum;
     [Tooltip("Hitbox dimensions")]

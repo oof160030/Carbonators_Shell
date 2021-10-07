@@ -271,6 +271,11 @@ PrefabInstance:
       propertyPath: C
       value: 113
       objectReference: {fileID: 0}
+    - target: {fileID: 1358124135034134026, guid: 863b396ede3d1cc4b91605004abdf7be,
+        type: 3}
+      propertyPath: PortNumber
+      value: 2
+      objectReference: {fileID: 0}
     - target: {fileID: 1358124135034134027, guid: 863b396ede3d1cc4b91605004abdf7be,
         type: 3}
       propertyPath: m_LocalPosition.x
@@ -937,6 +942,11 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 1358124135034134026, guid: 863b396ede3d1cc4b91605004abdf7be,
+        type: 3}
+      propertyPath: PortNumber
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 1358124135034134027, guid: 863b396ede3d1cc4b91605004abdf7be,
         type: 3}
       propertyPath: m_LocalPosition.x
@@ -996,6 +1006,11 @@ PrefabInstance:
         type: 3}
       propertyPath: m_Name
       value: Fighter_P1
+      objectReference: {fileID: 0}
+    - target: {fileID: 7770540574602546044, guid: 863b396ede3d1cc4b91605004abdf7be,
+        type: 3}
+      propertyPath: m_LocalScale.x
+      value: 1
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 863b396ede3d1cc4b91605004abdf7be, type: 3}

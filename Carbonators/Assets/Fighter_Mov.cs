@@ -36,9 +36,17 @@ public class Fighter_Mov : MonoBehaviour
             grounded = false; GC.overlap = false;
             Y = JumpSpeed;
         }
-        else Y = RB2.velocity.y - (gravityAcc*Time.deltaTime);
+        else Y = RB2.velocity.y;
 
         Vector3 traj = new Vector3(X, Y);
+        SetMovement(traj);
+    }
+
+    public void Gravity_Update()
+    {
+        float Y = RB2.velocity.y - (gravityAcc * Time.deltaTime);
+
+        Vector3 traj = new Vector3(RB2.velocity.x, Y);
         SetMovement(traj);
     }
 
@@ -46,6 +54,14 @@ public class Fighter_Mov : MonoBehaviour
     {
         //Recieves a vertical and horizontal speed to move, in the form of a vector 2 or 3
         RB2.velocity = trajectory;
+    }
+
+    public void Damage_Launch(Vector3 trajectory, bool right)
+    {
+        if (right)
+            RB2.velocity = trajectory;
+        else
+            RB2.velocity = Vector3.Reflect(trajectory, Vector3.left);
     }
 
     public void WallMovement(bool onRight)
