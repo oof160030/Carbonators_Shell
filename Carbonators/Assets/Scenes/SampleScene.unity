@@ -548,6 +548,12 @@ PrefabInstance:
       propertyPath: m_Color.b
       value: 0.6650944
       objectReference: {fileID: 0}
+    - target: {fileID: 1358124135034134024, guid: 863b396ede3d1cc4b91605004abdf7be,
+        type: 3}
+      propertyPath: m_Sprite
+      value: 
+      objectReference: {fileID: 7842243609137850321, guid: 65b95b069ed8e524784f386953075398,
+        type: 3}
     - target: {fileID: 1358124135034134026, guid: 863b396ede3d1cc4b91605004abdf7be,
         type: 3}
       propertyPath: UP
@@ -1452,6 +1458,12 @@ PrefabInstance:
       propertyPath: m_LocalScale.x
       value: 0.573521
       objectReference: {fileID: 0}
+    - target: {fileID: 1358124135034134024, guid: 863b396ede3d1cc4b91605004abdf7be,
+        type: 3}
+      propertyPath: m_Sprite
+      value: 
+      objectReference: {fileID: 7842243609137850321, guid: 65b95b069ed8e524784f386953075398,
+        type: 3}
     - target: {fileID: 1358124135034134026, guid: 863b396ede3d1cc4b91605004abdf7be,
         type: 3}
       propertyPath: PortNumber
@@ -1465,7 +1477,7 @@ PrefabInstance:
     - target: {fileID: 1358124135034134027, guid: 863b396ede3d1cc4b91605004abdf7be,
         type: 3}
       propertyPath: m_LocalPosition.y
-      value: -3.87
+      value: -4.001
       objectReference: {fileID: 0}
     - target: {fileID: 1358124135034134027, guid: 863b396ede3d1cc4b91605004abdf7be,
         type: 3}

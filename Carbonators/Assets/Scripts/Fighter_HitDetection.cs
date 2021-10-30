@@ -13,7 +13,7 @@ public class Fighter_HitDetection : MonoBehaviour
     {
         if(collision.CompareTag("HitBox"))
         {
-            //Note- this is also where we should check block height (overhead vs low) and possible shield strength!
+            //Note- this is also where we should check block height (overhead vs low) and possibly shield strength!
             
             //Get acces to the hitbox script, proceed if owner is different from hurtbox owner and hitbox has not been activated
             Active_Hitbox HB = collision.gameObject.GetComponent<Active_Hitbox>();

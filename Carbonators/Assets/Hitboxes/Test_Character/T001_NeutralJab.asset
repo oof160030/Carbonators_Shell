@@ -19,7 +19,6 @@ MonoBehaviour:
   HB_damage: 10
   HB_lifespan: 0.1
   HB_Knockback: {x: 3, y: 6, z: 0}
-  hitStop: 0.2
-  blockStop: 0.2
-  hitStun: 0.5
-  blockStun: 0.2
+  hitStop: 0
+  hitStun: 30
+  blockStun: 15

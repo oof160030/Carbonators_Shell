@@ -30,6 +30,7 @@ public class Fighter_Input : MonoBehaviour
     public int StickPos, priorStickPos; //Stores current stick position (1-9) and the prior position
     private bool pos_changed; //Triggers the frame when the stick changes position
     private float pos_duration; //Stores the time the position has been held, up to 3 seconds
+    private int Stick_X, Stick_Y; //Stores the absolute horizontal and vertical axis direction
     //Button variables
     private bool APressed, BPressed, CPressed; //Detects whether the button is currently being pressed or not
     private float ADuration, BDuration, CDuration; //Tracks how long the button has been pressed / released
@@ -56,7 +57,7 @@ public class Fighter_Input : MonoBehaviour
     void Update()
     {
         //Reduce stun times
-        if(F_State == FighterState.HITSTUN)
+        if(F_State == FighterState.HITSTUN || F_State == FighterState.BLOCK)
         {
             stunTime -= Time.deltaTime;
             if(stunTime <= 0)
@@ -66,24 +67,28 @@ public class Fighter_Input : MonoBehaviour
             }
         }
 
-        //Get current stick directions
+        //Get current stick directions and button inputs
         UpdateStick();
         UpdateButtons();
 
-        //Call movement function
-        int x = 0; int y = 0; bool j;
-        if (StickPos % 3 == 0) x = 1; else if (StickPos % 3 == 1) x = -1;
-        if (StickPos <= 3) y = -1; else if (StickPos >= 7) y = 1;
+        //Convert stick input to jump input and axis directions 
+        Stick_X = 0; Stick_Y = 0; bool jump;
+        if (StickPos % 3 == 0) Stick_X = 1; else if (StickPos % 3 == 1) Stick_X = -1;
+        if (StickPos <= 3) Stick_Y = -1; else if (StickPos >= 7) Stick_Y = 1;
 
-        j = (pos_changed && y > 0 && priorStickPos < 7);
+        jump = (pos_changed && Stick_Y > 0 && priorStickPos < 7);
 
         //update character facing
         UpdateFacing();
 
-        if(F_State == FighterState.NEUTRAL)
+        //Update animator stick inputs
+        AR.SetInteger("Horiz_Input", relative_X());
+
+        //Call movement function
+        if (F_State == FighterState.NEUTRAL)
         {
             //Manually move the player, if they are able to be controlled
-            F_Mov.Movement_Update(x, y, j);
+            F_Mov.Movement_Update(Stick_X, Stick_Y, jump);
 
             //Check which command inputs, if any, the player has generated
             F_Atk.CheckMoveList((APressed && ADuration == 0), (F_Mov.grounded && StickPos < 4));
@@ -106,6 +111,11 @@ public class Fighter_Input : MonoBehaviour
         //Update sprite renderer and hurtbox based on results
         SR.flipX = facingLeft;
         Hurtbox_TF.localScale = new Vector3((facingLeft ? -1 : 1), 1, 1);
+    }
+
+    private int relative_X()
+    {
+        return facingLeft ? -Stick_X : Stick_X;
     }
 
     //Update the fighter's input parameters
@@ -160,6 +170,13 @@ public class Fighter_Input : MonoBehaviour
                     //transition to Hitstun
                     F_State = FighterState.HITSTUN;
                 }
+                else if(newState == FighterState.BLOCK)
+                {
+                    //transition to Block state
+                    F_State = FighterState.BLOCK;
+                    //Set block trigger
+                    AR.SetTrigger("Block");
+                }
                 break;
             case FighterState.HITSTUN:
                 {
@@ -167,20 +184,50 @@ public class Fighter_Input : MonoBehaviour
                     F_State = FighterState.NEUTRAL;
                 }
                 break;
+            case FighterState.BLOCK:
+                if(newState == FighterState.NEUTRAL)
+                {
+                    //transition to Neutral
+                    F_State = FighterState.NEUTRAL;
+                    //Set block trigger
+                    AR.SetTrigger("Unblock");
+                }
+                break;
         }
 
     }
     public void Damaged(SO_Hitbox HB_Data, bool facing_right)
     {
-        //Deduct health
-        F_Stats.Take_Damage(HB_Data.HB_damage);
+        bool blocked_attack = false;
+        //Determine whether the attack was blocked or not
+        if(relative_X() < 0)
+        {
+            blocked_attack = true;
+        }
 
-        //Change fighter state, and set time to return to normal state
-        Change_State(FighterState.HITSTUN);
-        stunTime = HB_Data.hitStun;
+        //If the attack was NOT blocked, deal damage and knockback;
+        if(!blocked_attack)
+        {
+            //Deduct health
+            F_Stats.Take_Damage(HB_Data.HB_damage);
 
-        //Launch the fighter (using mov script)
-        F_Mov.Damage_Launch(HB_Data.HB_Knockback, facing_right);
+            //Change fighter state, and set time to return to normal state
+            Change_State(FighterState.HITSTUN);
+            stunTime = HB_Data.hitStun / 60.0f;
+
+            //Launch the fighter (using mov script)
+            F_Mov.Damage_Launch(HB_Data.HB_Knockback, facing_right);
+        }
+        //If the attack WAS blocked, play block animation and push the fighter
+        if(blocked_attack)
+        {
+            //Change fighter state, and set time to return to normal state
+            Change_State(FighterState.BLOCK);
+            stunTime = HB_Data.blockStun / 60.0f;
+
+            //Push self away, OR push the attacker if against the wall
+        }
+        
     }
 
     //Tell the fighter which side they are on

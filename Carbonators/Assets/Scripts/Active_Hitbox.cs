@@ -11,6 +11,7 @@ public class Active_Hitbox : MonoBehaviour
     private bool hit = false; //Set to true after colliding with an opposing hurtbox, usually deactivates the hitbox
     private float current_lifespan = 0; //The current time the hitbox has survived
     private bool facingRight = true;
+    private bool permanant = false; //Permanant hitboxes deactivate rather than selfdestruct, to allow use in the animator
     
     //On collision with player hurtbox, check ownership.
 
@@ -25,10 +26,12 @@ public class Active_Hitbox : MonoBehaviour
 
     private void Update()
     {
-        //Update duration, destroy hitbox if it has outlived its lifespan
+        //Update duration, destroy / deactivate hitbox if it has outlived its lifespan
         current_lifespan += Time.deltaTime;
         if (current_lifespan >= HB_Data.HB_lifespan)
-            Destroy(gameObject);
+        {
+            if(!permanant) Destroy(gameObject); else gameObject.SetActive(false);
+        }
     }
 
     public SO_Hitbox Get_HB_Data()

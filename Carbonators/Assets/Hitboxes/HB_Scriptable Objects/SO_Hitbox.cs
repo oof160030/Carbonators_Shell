@@ -18,8 +18,10 @@ public class SO_Hitbox : ScriptableObject
     public float HB_lifespan;
     [Tooltip("The direction the hitbox will send the opponent on contact. Assumes right facing.")]
     public Vector3 HB_Knockback;
-    [Tooltip("The amount of time the attacker's animation pauses for on hit and on block.")]
-    public float hitStop, blockStop;
-    [Tooltip("The amount of time the defender's animation pauses for on hit and on block.")]
-    public float hitStun, blockStun;
+    [Tooltip("The number of frames the attacker's and defender's animations pause for on hit.")]
+    public int hitStop;
+    [Tooltip("The duration, in frames, of the defender's hit animation.")]
+    public int hitStun;
+    [Tooltip("The duration, in frames, of the defender's block animation.")]
+    public int blockStun;
 }

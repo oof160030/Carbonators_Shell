@@ -8,6 +8,8 @@ public class Fighter_Attack : MonoBehaviour
 
     public SO_HitboxList HBox_List; //The hitboxes the given character can create
     public GameObject HitboxPrefab; //The hitbox prefab object that is used to instantiate the hitboxes
+    private GameObject MyHitbox;
+    private Active_Hitbox MyHB_Data;
     private int owner; //The player associated with the fighter | 1 = player 1 | 2 = player 2
     private Fighter_Input parent_FInput; //The fighter input object on the same object
     private Animator Atk_AR; //The animator tied to the fighter, controls fighting logic to a degree
@@ -51,11 +53,31 @@ public class Fighter_Attack : MonoBehaviour
         }
     }
 
+    public void ActivateHitbox(int boxCode)
+    {
+        //Identify the referenced hitbox - only attempt if the referenced hitbox exists
+        if (HBox_List.hitbox.Length > boxCode)
+        {
+            //Retreive the matching hitbox
+            SO_Hitbox HB = HBox_List.hitbox[boxCode];
+
+            //NOTE: Position is determined by the animator in this case
+
+            //Give the hitbox access to the scriptable object storing its data
+            MyHitbox.SetActive(true);
+            MyHB_Data.InitializeHitbox(HB, owner, parent_FInput.IsFacingRight());
+        }
+    }
+
     //When starting a match, set up the attack's owner, Fighter_Input script, and animator
     public void Initialize(int port, Fighter_Input parent, Animator X)
     {
         owner = port;
         parent_FInput = parent;
         Atk_AR = X;
+
+        MyHB_Data = GetComponentInChildren<Active_Hitbox>();
+        MyHitbox = MyHB_Data.gameObject; MyHB_Data.Owner = port;
+        MyHitbox.SetActive(false);
     }
 }
