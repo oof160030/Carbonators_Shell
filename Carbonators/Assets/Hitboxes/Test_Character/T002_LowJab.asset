@@ -15,10 +15,10 @@ MonoBehaviour:
   IDNum: 1
   sizeX: 1.6
   sizeY: 0.85
-  HB_position: {x: 0.93, y: 1.315, z: 0}
+  HB_position: {x: 1.3, y: 0.6, z: 0}
   HB_damage: 5
   HB_lifespan: 0.1
-  HB_Knockback: {x: 6, y: 3, z: 0}
+  HB_Knockback: {x: 1.15, y: 0.7, z: 0}
   hitStop: 0
   hitStun: 30
   blockStun: 15

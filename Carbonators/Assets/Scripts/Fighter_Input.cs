@@ -83,6 +83,7 @@ public class Fighter_Input : MonoBehaviour
 
         //Update animator stick inputs
         AR.SetInteger("Horiz_Input", relative_X());
+        AR.SetInteger("Vert_Input", Stick_Y);
 
         //Call movement function
         if (F_State == FighterState.NEUTRAL)
