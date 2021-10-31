@@ -13,17 +13,25 @@ public class Fighter_Attack : MonoBehaviour
     private int owner; //The player associated with the fighter | 1 = player 1 | 2 = player 2
     private Fighter_Input parent_FInput; //The fighter input object on the same object
     private Animator Atk_AR; //The animator tied to the fighter, controls fighting logic to a degree
+    private Fighter_AnimControl F_AC;
     
     //References the player's inputs once a button is pressed or released, and activates a move based on the results
     public void CheckMoveList(bool APress, bool groundDown)
     {
-        //
-        if (APress && groundDown)
-            Atk_AR.SetTrigger("A_Down_Pressed");
-        else if(APress)
+        if (APress)
+        {
             Atk_AR.SetTrigger("A_Pressed");
+            F_AC.Light_AnimTimer = 6;
+        }
+            
     }
 
+    //Initate Attack called by animator at start of attack animations, to lock the player into the attack
+    public void InitiateAttack(int state)
+    {
+        //Request Fighter Input change to attack state
+        parent_FInput.SetAttackState(state == 1);
+    }
 
     //Creates a hitbox, based on a provided hitbox code.
     public void CreateHitbox(int boxCode)
@@ -70,7 +78,7 @@ public class Fighter_Attack : MonoBehaviour
     }
 
     //When starting a match, set up the attack's owner, Fighter_Input script, and animator
-    public void Initialize(int port, Fighter_Input parent, Animator X)
+    public void Initialize(int port, Fighter_Input parent, Animator X, Fighter_AnimControl AC)
     {
         owner = port;
         parent_FInput = parent;
@@ -79,5 +87,7 @@ public class Fighter_Attack : MonoBehaviour
         MyHB_Data = GetComponentInChildren<Active_Hitbox>();
         MyHitbox = MyHB_Data.gameObject; MyHB_Data.Owner = port;
         MyHitbox.SetActive(false);
+
+        F_AC = AC;
     }
 }

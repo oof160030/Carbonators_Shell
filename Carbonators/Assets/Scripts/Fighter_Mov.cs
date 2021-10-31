@@ -5,6 +5,7 @@ using UnityEngine;
 public class Fighter_Mov : MonoBehaviour
 {
     // Controls and records fighter's movements (sets gravity, controls jumps and movement)
+    private Fighter_Input parent_FInput;
     private Rigidbody2D RB2;
     private GroundCheck GC;
     public float WalkSpeed, JumpSpeed;
@@ -17,6 +18,11 @@ public class Fighter_Mov : MonoBehaviour
         GC = GetComponentInChildren<GroundCheck>();
     }
 
+    public void Initialize(Fighter_Input Finput)
+    {
+        parent_FInput = Finput;
+    }
+
     private void Update()
     {
         grounded = GC.overlap;
@@ -26,8 +32,10 @@ public class Fighter_Mov : MonoBehaviour
     {
         //In cases where the fighter is moving themselves, updates their movements
         float X, Y;
+
         //Set horizontal movement on ground, maintain velocity in air
-        if (grounded) X = WalkSpeed * xIn;
+        if (parent_FInput.GetState() == FighterState.NEUTRAL && grounded && yIn > -1) X = WalkSpeed * xIn;
+        else if (grounded) X = 0;
         else X = RB2.velocity.x;
 
         //Set vertical movement - jump from ground and change grounded state, else accelerate down

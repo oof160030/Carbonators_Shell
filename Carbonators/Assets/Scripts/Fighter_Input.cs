@@ -17,6 +17,7 @@ public class Fighter_Input : MonoBehaviour
     private Fighter_Attack F_Atk; //Calls fighter attacks and interprets inputs
     private Fighter_HitDetection F_HitDet;
     private Fighter_Stats F_Stats;
+    private Fighter_AnimControl F_AnimCtrl; //Resets animator triggers and calls special animations (?)
 
     //Gameobject components
     private SpriteRenderer SR; //Displays sprites
@@ -45,11 +46,13 @@ public class Fighter_Input : MonoBehaviour
     {
         SR = GetComponent<SpriteRenderer>();
         AR = GetComponent<Animator>();
-        
-        F_Mov = GetComponent<Fighter_Mov>();
-        F_Atk = GetComponent<Fighter_Attack>(); F_Atk.Initialize(PortNumber, this,  AR);
+
+        F_AnimCtrl = GetComponent<Fighter_AnimControl>(); F_AnimCtrl.Init(AR);
+        F_Mov = GetComponent<Fighter_Mov>(); F_Mov.Initialize(this);
+        F_Atk = GetComponent<Fighter_Attack>(); F_Atk.Initialize(PortNumber, this,  AR, F_AnimCtrl);
         F_HitDet = GetComponentInChildren<Fighter_HitDetection>(); F_HitDet.Init(PortNumber, this);
         F_Stats = GetComponent<Fighter_Stats>(); F_Stats.Init(this);
+        
 
         priorStickPos = 5; StickPos = 5;
     }
@@ -177,6 +180,19 @@ public class Fighter_Input : MonoBehaviour
                     F_State = FighterState.BLOCK;
                     //Set block trigger
                     AR.SetTrigger("Block");
+                    F_AnimCtrl.Block_AnimTimer = 6;
+                }
+                else if(newState == FighterState.ATTACK)
+                {
+                    //transition to Attack state
+                    F_State = FighterState.ATTACK;
+                }
+                break;
+            case FighterState.ATTACK:
+                if (newState == FighterState.NEUTRAL)
+                {
+                    //transition to Neutral 
+                    F_State = FighterState.NEUTRAL;
                 }
                 break;
             case FighterState.HITSTUN:
@@ -192,11 +208,22 @@ public class Fighter_Input : MonoBehaviour
                     F_State = FighterState.NEUTRAL;
                     //Set block trigger
                     AR.SetTrigger("Unblock");
+                    F_AnimCtrl.Unblock_AnimTimer = 6;
                 }
                 break;
         }
 
     }
+
+    public void SetAttackState(bool state)
+    {
+        //Validate attack request here
+        if(state && F_State == FighterState.NEUTRAL)
+            Change_State(FighterState.ATTACK);
+        else if (!state && F_State == FighterState.ATTACK)
+            Change_State(FighterState.NEUTRAL);
+    }
+
     public void Damaged(SO_Hitbox HB_Data, bool facing_right)
     {
         bool blocked_attack = false;
@@ -237,6 +264,8 @@ public class Fighter_Input : MonoBehaviour
         onRight = isOnRight;
     }
 
+    //GETTER Functions
+
     public bool IsOnRight()
     {
         return onRight;
@@ -252,4 +281,8 @@ public class Fighter_Input : MonoBehaviour
         return F_Mov.grounded;
     }
 
+    public FighterState GetState()
+    {
+        return F_State;
+    }
 }
