@@ -57,7 +57,7 @@ public class Fighter_Attack : MonoBehaviour
 
             //Give the hitbox access to the scriptable object storing its data
             Active_Hitbox HB_Script = newHitBox.GetComponent<Active_Hitbox>();
-            HB_Script.InitializeHitbox(HB, owner, parent_FInput.IsFacingRight());
+            HB_Script.InitializeHitbox(HB, parent_FInput, owner, parent_FInput.IsFacingRight());
         }
     }
 
@@ -73,7 +73,7 @@ public class Fighter_Attack : MonoBehaviour
 
             //Give the hitbox access to the scriptable object storing its data
             MyHitbox.SetActive(true);
-            MyHB_Data.InitializeHitbox(HB, owner, parent_FInput.IsFacingRight());
+            MyHB_Data.InitializeHitbox(HB, parent_FInput, owner, parent_FInput.IsFacingRight());
         }
     }
 
