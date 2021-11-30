@@ -20,8 +20,9 @@ public class Fighter_Attack : MonoBehaviour
     {
         if (APress)
         {
+            //Atk_AR.SetTrigger("A_Pressed");
+            //F_AC.Light_AnimTimer = 6;
             Atk_AR.SetTrigger("A_Pressed");
-            F_AC.Light_AnimTimer = 6;
         }
             
     }
@@ -46,7 +47,7 @@ public class Fighter_Attack : MonoBehaviour
             GameObject newHitBox;
 
             //Instantiate the hitbox in the expected position if facing right
-            if (parent_FInput.IsFacingRight())
+            if (parent_FInput.Get_FacingRight())
                 newHitBox = Instantiate(HitboxPrefab, transform.position + HB.HB_position, Quaternion.identity, transform);
             else
             {
@@ -57,7 +58,7 @@ public class Fighter_Attack : MonoBehaviour
 
             //Give the hitbox access to the scriptable object storing its data
             Active_Hitbox HB_Script = newHitBox.GetComponent<Active_Hitbox>();
-            HB_Script.InitializeHitbox(HB, parent_FInput, owner, parent_FInput.IsFacingRight());
+            HB_Script.InitializeHitbox(HB, parent_FInput, owner, parent_FInput.Get_FacingRight());
         }
     }
 
@@ -73,7 +74,7 @@ public class Fighter_Attack : MonoBehaviour
 
             //Give the hitbox access to the scriptable object storing its data
             MyHitbox.SetActive(true);
-            MyHB_Data.InitializeHitbox(HB, parent_FInput, owner, parent_FInput.IsFacingRight());
+            MyHB_Data.InitializeHitbox(HB, parent_FInput, owner, parent_FInput.Get_FacingRight());
         }
     }
 

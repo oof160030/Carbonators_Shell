@@ -16,32 +16,33 @@ public class Fighter_Input : MonoBehaviour
     //Child components
     private Fighter_Mov F_Mov; //Controls fighter movement
     private Fighter_Attack F_Atk; //Calls fighter attacks and interprets inputs
-    private Fighter_HitDetection F_HitDet;
-    private Fighter_Stats F_Stats;
+    private Fighter_HitDetection F_HitDet; //Connected to the fighters hurtboxes
+    private Fighter_Stats F_Stats; //Tracks the stats of the fighter (such as Health and Shield)
     private Fighter_AnimControl F_AnimCtrl; //Resets animator triggers and calls special animations (?)
 
     //Gameobject components
-    private SpriteRenderer SR; //Displays sprites
+    private SpriteRenderer SR; //Displays sprites, used here to flip sprites when looking left
     public int PortNumber; //Determines if player 1 or 2 is controlling this character
-    private Animator AR; //The gameobject's animator object, controls some fighter logic
-    public Transform Hurtbox_TF; //The fighter's hurtbox position
+    private Animator AR; //The gameobject's animator object
+    public Transform Hurtbox_TF; //The fighter's hurtbox transform, used to mirror the fighter's hurtbox when facing left
 
     //Keycodes
-    public KeyCode UP, DOWN, LEFT, RIGHT, A, B, C;
+    public KeyCode UP, DOWN, LEFT, RIGHT, A, B, C; //Inputs can be changed by changing these Keycode variables
     //Joystick variables
-    public int StickPos, priorStickPos; //Stores current stick position (1-9) and the prior position
+    public int stickPos, priorStickPos; //Stores current and prior stick position (1-9)
     private bool pos_changed; //Triggers the frame when the stick changes position
-    private float pos_duration; //Stores the time the position has been held, up to 3 seconds
-    private int Stick_X, Stick_Y; //Stores the absolute horizontal and vertical axis direction
+    private float pos_duration; //Stores the time the current stick position has been held, up to 3 seconds
+    private int Stick_X, Stick_Y; //Stores the horizontal and vertical axes (-1, 0, 1) seperately
+    private bool jump;
     //Button variables
     private bool APressed, BPressed, CPressed; //Detects whether the button is currently being pressed or not
-    private float ADuration, BDuration, CDuration; //Tracks how long the button has been pressed / released
+    private float ADuration, BDuration, CDuration; //Tracks how long the button has been pressed/released. When duration=0, has just changed
 
     //Positioning Variables
     private bool facingLeft = true; //Stores if the fighter is currently facing left
-    private bool onRight = true; //Stores whether the fighter is currently on the right of the opponent
-    public bool CanBackUp = true; //Stores whether the fighter is too close to the wall behind them
-    public bool gravityOn = true; //Determines if gravity is currently active
+    private bool onRight = true; //Stores whether the fighter is currently further right than the opponent
+    public bool CanBackUp = true; //When false, the fighter is too close to the wall behind them to back up. Will be used to determine pushback.
+    public bool gravityOn = true; //Determines if gravity is currently affecting the fighter
 
     // Reads player input frame by frame. References the fighter's moves and physics through seperate scripts.
     void Start()
@@ -55,15 +56,12 @@ public class Fighter_Input : MonoBehaviour
         F_HitDet = GetComponentInChildren<Fighter_HitDetection>(); F_HitDet.Init(PortNumber, this);
         F_Stats = GetComponent<Fighter_Stats>(); F_Stats.Init(this);
         
-
-        priorStickPos = 5; StickPos = 5;
+        priorStickPos = 5; stickPos = 5;
     }
 
     void Update()
     {
-        
-
-        //Reduce hitstop duration
+        //Reduces hitstop duration if the fighter is currently in hitstop.
         if(hitStopTime > 0)
         {
             hitStopTime = Mathf.Clamp(hitStopTime - Time.deltaTime * 60f,0,100); //Reduce hitstop duration by frames
@@ -74,8 +72,8 @@ public class Fighter_Input : MonoBehaviour
             }
         }
         
-        //Reduce stun times
-        if((F_State == FighterState.HITSTUN || F_State == FighterState.BLOCK) && hitStopTime == 0)
+        //Reduce duration of hitstun and blockstun
+        if(hitStopTime == 0 && (F_State == FighterState.HITSTUN || F_State == FighterState.BLOCK) && hitStopTime == 0)
         {
             stunTime -= Time.deltaTime;
             if(stunTime <= 0)
@@ -85,39 +83,34 @@ public class Fighter_Input : MonoBehaviour
             }
         }
 
-        //Get current stick directions and button inputs
+        //Get current stick directions and button inputs, then convert stick input to jump input and axis directions 
         UpdateStick();
         UpdateButtons();
+        UpdateJoystickAxes();
 
-        //Convert stick input to jump input and axis directions 
-        Stick_X = 0; Stick_Y = 0; bool jump;
-        if (StickPos % 3 == 0) Stick_X = 1; else if (StickPos % 3 == 1) Stick_X = -1;
-        if (StickPos <= 3) Stick_Y = -1; else if (StickPos >= 7) Stick_Y = 1;
-
-        jump = (pos_changed && Stick_Y > 0 && priorStickPos < 7);
-
-        //update character facing
+        //Update the direction the character is facing
         UpdateFacing();
 
         //Update animator stick inputs
-        AR.SetInteger("Horiz_Input", relative_X());
+        AR.SetInteger("Horiz_Input", Relative_X());
         AR.SetInteger("Vert_Input", Stick_Y);        
 
         //Standard Movement if fighter is in neutral state and not in hitstop
         if (F_State == FighterState.NEUTRAL && hitStopTime == 0)
         {
             //Set Jump animator trigger if needed
-            if (jump && IsGrounded())
+            if (jump && Get_IsGrounded())
             {
-                AR.SetTrigger("Jump");
-                F_AnimCtrl.Jump_AnimTimer = 6;
+                F_AnimCtrl.SetTrigger("Jump");
+                //AR.SetTrigger("Jump");
+                //F_AnimCtrl.Jump_AnimTimer = 6;
             }
 
             //Manually move the player, if they are able to be controlled
             F_Mov.Standard_Movement(Stick_X, Stick_Y, jump);
 
             //Check which command inputs, if any, the player has generated
-            F_Atk.CheckMoveList((APressed && ADuration == 0), (F_Mov.grounded && StickPos < 4));
+            F_Atk.CheckMoveList((APressed && ADuration == 0), (F_Mov.grounded && stickPos < 4));
         }
 
         //Update speed based on gravity UNLESS fighter is in hitstop or animating with keyframes.
@@ -142,25 +135,23 @@ public class Fighter_Input : MonoBehaviour
         Hurtbox_TF.localScale = new Vector3((facingLeft ? -1 : 1), 1, 1);
     }
 
-    private int relative_X()
-    {
-        return facingLeft ? -Stick_X : Stick_X;
-    }
-
-    //Update the fighter's input parameters
+    #region //[4]INPUT UPDATES - Methods that track or evaluate player input
+    /// <summary>
+    /// Tracks joystick position and duration, sets numerical position
+    /// </summary>
     public void UpdateStick()
     {
         //Read player inputs
         pos_changed = false;
-        int pos = 5;
-        if (Input.GetKey(LEFT)) pos--; if (Input.GetKey(RIGHT)) pos++;
-        if (Input.GetKey(UP)) pos += 3; if (Input.GetKey(DOWN)) pos -= 3;
+        int new_Pos = 5;
+        if (Input.GetKey(LEFT)) new_Pos--; if (Input.GetKey(RIGHT)) new_Pos++;
+        if (Input.GetKey(UP)) new_Pos += 3; if (Input.GetKey(DOWN)) new_Pos -= 3;
 
         //Update stick position save if position changed
-        if(pos != StickPos)
+        if(new_Pos != stickPos)
         {
-            priorStickPos = StickPos;
-            StickPos = pos;
+            priorStickPos = stickPos;
+            stickPos = new_Pos;
             pos_duration = 0;
             pos_changed = true;
         }
@@ -169,6 +160,9 @@ public class Fighter_Input : MonoBehaviour
             pos_duration = Mathf.Clamp(pos_duration + Time.deltaTime,0,3);
         }
     }
+    /// <summary>
+    /// Check when face buttons are pressed / released, tracks input duration
+    /// </summary>
     public void UpdateButtons()
     {
         //Increase time buttons have been in the current state, up to 3 seconds
@@ -186,114 +180,146 @@ public class Fighter_Input : MonoBehaviour
             ADuration = 0;
         }
     }
+    /// <summary>
+    /// Sets Joystick X and Y axes, and generates jump inputs
+    /// </summary>
+    private void UpdateJoystickAxes()
+    {
+        Stick_X = 0; Stick_Y = 0;
+        if (stickPos % 3 == 0) Stick_X = 1; else if (stickPos % 3 == 1) Stick_X = -1;
+        if (stickPos <= 3) Stick_Y = -1; else if (stickPos >= 7) Stick_Y = 1;
+
+        jump = (pos_changed && Stick_Y > 0 && priorStickPos < 7);
+    }
+    /// <summary>
+    /// Determines if fighter is holding forward or back relative to direction they're facing
+    /// </summary>
+    /// <returns> X Axis integer (-1, 0, 1) </returns>
+    private int Relative_X()
+    {
+        return facingLeft ? -Stick_X : Stick_X;
+    }
+    #endregion
 
     //Manage state changes based on moves and taking damage
+    /// <summary>
+    /// Validates requests to change the fighter's state - activates some animation triggers 
+    /// </summary>
+    /// <param name="newState"></param>
     private void Change_State(FighterState newState)
     {
-        //Check if the state transition is valid
+        //Check the current state, then choose action based on new requested state
         switch(F_State)
         {
             case FighterState.NEUTRAL:
-                if(newState == FighterState.HITSTUN)
+                //Neutral >> Hitstun
+                if (newState == FighterState.HITSTUN)
                 {
-                    //transition to Hitstun
                     F_State = FighterState.HITSTUN;
                 }
-                else if(newState == FighterState.TUMBLE)
+                //Neutral >> Tumble
+                else if (newState == FighterState.TUMBLE)
                 {
-                    //transition to Tumble
                     F_State = FighterState.TUMBLE;
                 }
-                else if(newState == FighterState.BLOCK)
+                //Neutral >> Block; sets "Block" animation trigger
+                else if (newState == FighterState.BLOCK)
                 {
-                    //transition to Block state
                     F_State = FighterState.BLOCK;
                     //Set block trigger
-                    AR.SetTrigger("Block");
-                    F_AnimCtrl.Block_AnimTimer = 6;
+                    F_AnimCtrl.SetTrigger("Block");
+                    //AR.SetTrigger("Block");
+                    //F_AnimCtrl.Block_AnimTimer = 6;
                 }
-                else if(newState == FighterState.ATTACK)
+                //Neutral >> Attack
+                else if (newState == FighterState.ATTACK)
                 {
-                    //transition to Attack state
                     F_State = FighterState.ATTACK;
                 }
                 break;
+
             case FighterState.ATTACK:
+                //Attack >> Neutral
                 if (newState == FighterState.NEUTRAL)
                 {
-                    //transition to Neutral 
                     F_State = FighterState.NEUTRAL;
                 }
+                //Attack >> Hitstun
                 else if (newState == FighterState.HITSTUN)
                 {
-                    //transition to Hitstun
                     F_State = FighterState.HITSTUN;
                 }
+                //Attack >> Tumble
                 else if (newState == FighterState.TUMBLE)
                 {
-                    //transition to Tumble
                     F_State = FighterState.TUMBLE;
                 }
                 break;
+
             case FighterState.HITSTUN:
+                //Hitstun >> Neutral; sets "Hurt_Recover" animation trigger
                 if (newState == FighterState.NEUTRAL)
                 {
-                    //Transition to Neutral
                     F_State = FighterState.NEUTRAL;
                     //Set recovery trigger
-                    AR.SetTrigger("Hurt_Recover");
+                    F_AnimCtrl.SetTrigger("Hurt_Recover");
+                    //AR.SetTrigger("Hurt_Recover");
                 }
+                //Hitstun >> Tumble
                 else if (newState == FighterState.TUMBLE)
                 {
-                    //transition to Tumble
                     F_State = FighterState.TUMBLE;
                 }
                 break;
+
             case FighterState.TUMBLE:
-                if(newState == FighterState.GROUNDED)
+                //Tumble >> Grounded
+                if (newState == FighterState.GROUNDED)
                 {
-                    //Transition to Neutral
                     F_State = FighterState.GROUNDED;
                 }
                 break;
+
             case FighterState.BLOCK:
-                if(newState == FighterState.NEUTRAL)
+                //Block >> Neutral; sets "Unblock" animation trigger
+                if (newState == FighterState.NEUTRAL)
                 {
-                    //transition to Neutral
                     F_State = FighterState.NEUTRAL;
-                    //Set block trigger
-                    AR.SetTrigger("Unblock");
-                    F_AnimCtrl.Unblock_AnimTimer = 6;
+                    //Set unblock trigger
+                    F_AnimCtrl.SetTrigger("Unblock");
+                    //AR.SetTrigger("Unblock");
+                    //F_AnimCtrl.Unblock_AnimTimer = 6;
                 }
                 break;
+
             case FighterState.GROUNDED:
+                //Grounded >> Neutral
                 if(newState == FighterState.NEUTRAL)
                 {
-                    //transition to Neutral
                     F_State = FighterState.NEUTRAL;
                 }
                 break;
         }
-
     }
-
-    public void SetAttackState(bool state)
+    /// <summary>
+    /// Allows child Fighter Attack Script to request state change, since Change_State is private
+    /// </summary>
+    /// <param name="setToAttack"></param>
+    public void SetAttackState(bool setToAttack)
     {
-        //Validate attack request here
-        if(state && F_State == FighterState.NEUTRAL)
+        //Allow switching between neutral state and attack state
+        if(setToAttack && F_State == FighterState.NEUTRAL)
             Change_State(FighterState.ATTACK);
-        else if (!state && F_State == FighterState.ATTACK)
+        else if (!setToAttack && F_State == FighterState.ATTACK)
             Change_State(FighterState.NEUTRAL);
     }
 
-    public void Damaged(SO_Hitbox HB_Data, bool facing_right)
+    public void Damaged(SO_Hitbox HB_Data, bool hitbox_facing_right, Fighter_Input Attacker)
     {
         bool blocked_attack = false;
         //Determine whether the attack was blocked or not
-        if(relative_X() < 0)
-        {
+        if(Relative_X() < 0)
             blocked_attack = true;
-        }
 
         //If the attack was NOT blocked, deal damage and knockback;
         if(!blocked_attack)
@@ -301,21 +327,20 @@ public class Fighter_Input : MonoBehaviour
             //Deduct health
             F_Stats.Take_Damage(HB_Data.HB_damage);
 
-            //If hit on the ground, change fighter state, and set time to return to normal state
-            if(IsGrounded())
+            //If hit on the ground, change fighter state to hitstun, and set duration of the stun
+            if(Get_IsGrounded())
             {
                 Change_State(FighterState.HITSTUN);
                 stunTime = HB_Data.hitStun / 60.0f;
             }
-            //If hit in the air, change to tumble state until landing
-            else if(!IsGrounded())
+            //If hit in the air, change to tumble state until the fighter lands
+            else if(!Get_IsGrounded())
             {
                 Change_State(FighterState.TUMBLE);
             }
-            
 
-            //Choose the damage animation
-            if (!IsGrounded())
+            //Trigger the correct damage animation based on groundedness and crouch status
+            if (!Get_IsGrounded())
                 AR.SetTrigger("Hurt_Air");
             else if (Stick_Y == -1)
                 AR.SetTrigger("Hurt_Crouching");
@@ -323,8 +348,8 @@ public class Fighter_Input : MonoBehaviour
                 AR.SetTrigger("Hurt_Grounded");
 
             //Launch the fighter (using mov script)
-            F_Mov.Damage_Launch(HB_Data.HB_Knockback, facing_right);
-            setHitStop(HB_Data.hitStop);
+            F_Mov.Damage_Launch(HB_Data.HB_Knockback, hitbox_facing_right);
+            Set_HitStopTime(HB_Data.hitStop);
         }
         //If the attack WAS blocked, play block animation and push the fighter
         if(blocked_attack)
@@ -332,20 +357,42 @@ public class Fighter_Input : MonoBehaviour
             //Change fighter state, and set time to return to normal state
             Change_State(FighterState.BLOCK);
             stunTime = HB_Data.blockStun / 60.0f;
-            setHitStop(HB_Data.hitStop);
+            Set_HitStopTime(HB_Data.hitStop);
 
             //Push self away, OR push the attacker if against the wall
+            if(CanBackUp)
+                F_Mov.Damage_Launch(HB_Data.HB_Knockback, hitbox_facing_right);
+            else
+                Attacker.Block_Pushback(HB_Data, hitbox_facing_right);
         }
-        
     }
 
-    //Tell the fighter which side they are on
-    public void SetRightBool(bool isOnRight)
+    /// <summary>
+    /// Pushes the fighter backwards when they are grounded and hitting an opponent against the wall.
+    /// </summary>
+    /// <param name="HB_Data"></param>
+    /// <param name="hb_facing_right"></param>
+    public void Block_Pushback(SO_Hitbox HB_Data, bool hb_facing_right)
+    {
+        if(Get_IsGrounded()) //May check if grounded before defender calls this method
+            F_Mov.Damage_Launch(HB_Data.HB_Knockback, !hb_facing_right); //Remember - knockback is reversed in this case!
+    }
+
+    #region//[2] Set Functions, used to set variables without exposing them
+    /// <summary>
+    /// Sets whether the fighter is further to the right than their opponent
+    /// </summary>
+    /// <param name="isOnRight"></param>
+    public void Set_OnRight(bool isOnRight)
     {
         onRight = isOnRight;
     }
-
-    public void setHitStop(float stopTime)
+    /// <summary>
+    /// Sets the duration of time the player is in hitstop for, and activates the hitstop.
+    /// Called by the Damage script when taking damage, and by the hitbox when dealing damage
+    /// </summary>
+    /// <param name="stopTime"></param>
+    public void Set_HitStopTime(float stopTime)
     {
         if(stopTime > 0)
         {
@@ -354,26 +401,24 @@ public class Fighter_Input : MonoBehaviour
             F_AnimCtrl.SetAnimSpeed(0);
         }
     }
+    #endregion
 
-    //GETTER Functions
-
-    public bool IsOnRight()
+    #region//[4] Get Functions, used to control access to variables
+    public bool Get_OnRight()
     {
         return onRight;
     }
-
-    public bool IsFacingRight()
+    public bool Get_FacingRight()
     {
         return !facingLeft;
     }
-
-    public bool IsGrounded()
+    public bool Get_IsGrounded()
     {
         return F_Mov.grounded;
     }
-
-    public FighterState GetState()
+    public FighterState Get_FighterState()
     {
         return F_State;
     }
+    #endregion
 }

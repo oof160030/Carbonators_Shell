@@ -51,9 +51,14 @@ public class Active_Hitbox : MonoBehaviour
         return hit;
     }
 
+    public Fighter_Input Get_Owner()
+    {
+        return OwnerScript;
+    }
+
     public void Set_HitState(bool state)
     {
         hit = state;
-        OwnerScript.setHitStop(HB_Data.hitStop);
+        OwnerScript.Set_HitStopTime(HB_Data.hitStop);
     }
 }

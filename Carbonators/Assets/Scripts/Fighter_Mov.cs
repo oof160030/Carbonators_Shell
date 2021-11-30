@@ -83,6 +83,11 @@ public class Fighter_Mov : MonoBehaviour
         RB2.velocity = trajectory;
     }
 
+    /// <summary>
+    /// Launches the fighter in the direction received.
+    /// </summary>
+    /// <param name="trajectory"></param>
+    /// <param name="right"></param>
     public void Damage_Launch(Vector3 trajectory, bool right)
     {
         if (grounded) //And not a launcher

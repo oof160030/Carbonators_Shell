@@ -28,7 +28,7 @@ public class Fighter_HitDetection : MonoBehaviour
                 bool hBox_facing_right = HB.Get_Facing();
 
                 //Send info to damage manager
-                F_In.Damaged(hit_data, hBox_facing_right);
+                F_In.Damaged(hit_data, hBox_facing_right, HB.Get_Owner());
             }
         }
     }
