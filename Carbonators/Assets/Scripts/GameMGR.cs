@@ -5,16 +5,23 @@ using TMPro;
 
 public class GameMGR : MonoBehaviour
 {
-    //Controls the game's state during each match.
-    //For now, there are no characters or menus, and battles reset after play.
+    //Controls the game's state during each match. May also control game states outside of gameplay, but not sure.
+    //For now, there are no characters or menus, and battles (should) reset after play.
 
-    Fighter_Input fighter1, fighter2;
-    public Cam_Control CC;
-    public TextMeshProUGUI P1_HP, P2_HP;
+    private Fighter_Input fighter1, fighter2; //Access to the two fighter methods.
+    public GameObject fighterPrefab;
+    public Cam_Control CC; //Access to the camera controller, for keeping players in frame.
+    public TextMeshProUGUI P1_HP, P2_HP; //Access to the (placeholder) HP markers (may be moved to a seperate UI controller?)
     void Start()
     {
-        //Get access to the two fighters, set their inital positions.
-        GameObject[] fighters = GameObject.FindGameObjectsWithTag("Player");
+        //Get access to the two fighters, and sets their inital positions.
+        //(Should be replaced by spawning in the 2 fighters itself)
+        //GameObject[] fighters = GameObject.FindGameObjectsWithTag("Player");
+
+        fighter1 = Instantiate(fighterPrefab).GetComponent<Fighter_Input>();
+        fighter2 = Instantiate(fighterPrefab).GetComponent<Fighter_Input>();
+
+        /*
         if (fighters[0].transform.position.x < fighters[1].transform.position.x)
         {
             fighter1 = fighters[0].GetComponent<Fighter_Input>();
@@ -27,11 +34,13 @@ public class GameMGR : MonoBehaviour
             fighter1 = fighters[1].GetComponent<Fighter_Input>();
             fighter2.Set_OnRight(false); fighter1.Set_OnRight(true);
         }
-        fighter1.MGR = this; fighter2.MGR = this;
+        */
+
+        //Gives the fighters access to the manager instance
+        fighter1.Init(this, true, fighter2); fighter2.Init(this, false, fighter1);
 
         CC.fighter1 = fighter1.transform;
         CC.fighter2 = fighter2.transform;
-
 
     }
 

@@ -6,7 +6,8 @@ public enum FighterState {NEUTRAL, ATTACK, BLOCK, HITSTUN, HITSTOP, TUMBLE, GROU
 public class Fighter_Input : MonoBehaviour
 {
     //The master script for each fighter, responsible for calling all other scripts
-    public GameMGR MGR;
+    private GameMGR MGR;
+    private Fighter_Input Opponent; //Script for the opposing fighter
 
     //Fighter State - Referenced to keep track of what the fighter is currently doing and influence if inputs are received.
     public FighterState F_State;
@@ -47,7 +48,8 @@ public class Fighter_Input : MonoBehaviour
     // Reads player input frame by frame. References the fighter's moves and physics through seperate scripts.
     void Start()
     {
-        SR = GetComponent<SpriteRenderer>();
+
+        /*SR = GetComponent<SpriteRenderer>();
         AR = GetComponent<Animator>();
 
         F_AnimCtrl = GetComponent<Fighter_AnimControl>(); F_AnimCtrl.Init(AR);
@@ -56,6 +58,60 @@ public class Fighter_Input : MonoBehaviour
         F_HitDet = GetComponentInChildren<Fighter_HitDetection>(); F_HitDet.Init(PortNumber, this);
         F_Stats = GetComponent<Fighter_Stats>(); F_Stats.Init(this);
         
+        priorStickPos = 5; stickPos = 5;
+        */
+    }
+
+    public void Init(GameMGR manager, bool playerOne, Fighter_Input enemy)
+    {
+        //Reconnect to manager
+        MGR = manager;
+
+        //Connect to opponent
+        Opponent = enemy;
+        
+        if(playerOne)
+        {
+            //Set player position and port number
+            transform.position = new Vector3(-4.4f, -4f, 0);
+            Set_OnRight(false);
+            PortNumber = 1;
+
+            //Set keycodes
+            UP = KeyCode.UpArrow;
+            DOWN = KeyCode.DownArrow;
+            LEFT = KeyCode.LeftArrow;
+            RIGHT = KeyCode.RightArrow;
+            A = KeyCode.Z;
+            B = KeyCode.X;
+            C = KeyCode.Space;
+        }
+        else
+        {
+            transform.position = new Vector3(4.4f, -4f, 0);
+            Set_OnRight(true);
+            PortNumber = 2;
+
+            //Set keycodes
+            UP = KeyCode.R;
+            DOWN = KeyCode.F;
+            LEFT = KeyCode.D;
+            RIGHT = KeyCode.G;
+            A = KeyCode.A;
+            B = KeyCode.S;
+            C = KeyCode.Q;
+        }
+
+        //Gain access to and initialize components
+        SR = GetComponent<SpriteRenderer>();
+        AR = GetComponent<Animator>();
+
+        F_AnimCtrl = GetComponent<Fighter_AnimControl>(); F_AnimCtrl.Init(AR);
+        F_Mov = GetComponent<Fighter_Mov>(); F_Mov.Initialize(this, AR);
+        F_Atk = GetComponent<Fighter_Attack>(); F_Atk.Initialize(PortNumber, this, AR, F_AnimCtrl);
+        F_HitDet = GetComponentInChildren<Fighter_HitDetection>(); F_HitDet.Init(PortNumber, this);
+        F_Stats = GetComponent<Fighter_Stats>(); F_Stats.Init(this);
+
         priorStickPos = 5; stickPos = 5;
     }
 
@@ -404,6 +460,10 @@ public class Fighter_Input : MonoBehaviour
     #endregion
 
     #region//[4] Get Functions, used to control access to variables
+    public GameMGR Get_MGR()
+    {
+        return MGR;
+    }
     public bool Get_OnRight()
     {
         return onRight;
