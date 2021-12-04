@@ -23,6 +23,6 @@ public class Fighter_Stats : MonoBehaviour
         Health -= damage;
 
         //Update UI in this step
-        F_Input.MGR.updateHealthUI(F_Input.PortNumber, Health);
+        F_Input.Get_MGR().PH_updateHealthUI(F_Input.PortNumber, Health);
     }
 }

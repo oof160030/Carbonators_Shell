@@ -7,6 +7,12 @@ public class GroundCheck : MonoBehaviour
     // Checks if the fighter is touching the ground, is referenced by fighter_input. Descriptions updated 10/3
     public bool overlap; //If the hitbox is currently overlapping with the ground
     private float groundStay; //How long the hitbox has been touching the ground
+    Fighter_Mov Owner_MoveScript;
+
+    public void Init(Fighter_Mov FM)
+    {
+        Owner_MoveScript = FM;
+    }
 
     private void OnTriggerStay2D(Collider2D collision)
     {
@@ -18,6 +24,7 @@ public class GroundCheck : MonoBehaviour
             {
                 overlap = true;
                 groundStay = 0;
+                Owner_MoveScript.Set_Grounded(overlap);
             }
         }
     }
@@ -26,12 +33,18 @@ public class GroundCheck : MonoBehaviour
     private void OnTriggerEnter2D(Collider2D collision)
     {
         if (collision.CompareTag("Ground"))
+        {
             overlap = true;
+            Owner_MoveScript.Set_Grounded(overlap);
+        }
     }
 
     private void OnTriggerExit2D(Collider2D collision)
     {
         if (collision.CompareTag("Ground"))
+        {
             overlap = false;
+            Owner_MoveScript.Set_Grounded(overlap);
+        }
     }
 }

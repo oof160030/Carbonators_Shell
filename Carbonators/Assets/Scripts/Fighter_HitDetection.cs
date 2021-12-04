@@ -8,6 +8,12 @@ public class Fighter_HitDetection : MonoBehaviour
     int owner; //1= p1, 2= p2
     Fighter_Input F_In;
 
+    public void Init(int port, Fighter_Input Finput)
+    {
+        owner = port;
+        F_In = Finput;
+    }
+
     //Receives information from a hitbox on contact
     private void OnTriggerEnter2D(Collider2D collision)
     {
@@ -18,24 +24,18 @@ public class Fighter_HitDetection : MonoBehaviour
             //Get acces to the hitbox script, proceed if owner is different from hurtbox owner and hitbox has not been activated
             Active_Hitbox HB = collision.gameObject.GetComponent<Active_Hitbox>();
 
-            if(HB.Owner != owner && !HB.Get_HitState())
+            if(HB.Owner != owner && !HB.Get_HitStatus())
             {
                 //Tell the hitbox it has been hit
-                HB.Set_HitState(true);
+                HB.Set_HitStatus(true);
 
                 //Collect all information needed
                 SO_Hitbox hit_data = HB.Get_HB_Data();
-                bool hBox_facing_right = HB.Get_Facing();
+                bool hBox_facing_right = HB.Get_FacingRight();
 
                 //Send info to damage manager
-                F_In.Damaged(hit_data, hBox_facing_right);
+                F_In.Damaged(hit_data, hBox_facing_right, HB.Get_OwnerFInput());
             }
         }
-    }
-
-    public void Init(int port, Fighter_Input Finput)
-    {
-        owner = port;
-        F_In = Finput;
     }
 }
