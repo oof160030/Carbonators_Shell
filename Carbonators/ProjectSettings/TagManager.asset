@@ -7,6 +7,8 @@ TagManager:
   - Ground
   - HitBox
   - HurtBox
+  - LeftWall
+  - RightWall
   layers:
   - Default
   - TransparentFX

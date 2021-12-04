@@ -16,27 +16,39 @@ public class Fighter_Mov : MonoBehaviour
     
     void Start()
     {
-        RB2 = GetComponent<Rigidbody2D>();
-        GC = GetComponentInChildren<GroundCheck>();
+        //RB2 = GetComponent<Rigidbody2D>();
+        //GC = GetComponentInChildren<GroundCheck>();
     }
 
     public void Initialize(Fighter_Input Finput, Animator Anim)
     {
         parent_FInput = Finput;
         AR = Anim;
+        RB2 = GetComponent<Rigidbody2D>();
+        GC = GetComponentInChildren<GroundCheck>(); GC.Init(this);
     }
 
     private void Update()
     {
-        grounded = GC.overlap;
+        //Check if the fighter is grounded
+        //grounded = GC.overlap;
+        //AR.SetBool("Grounded", grounded);
+    }
+
+    //Sets the player's grounded state, and sends the appropriate signal to the animator. Called by groundcheck (GC) script
+    public void Set_Grounded(bool isGrounded)
+    {
+        grounded = isGrounded;
         AR.SetBool("Grounded", grounded);
     }
 
+    //Activates the player's jump, setting player speed and ground state. Called by the player's animator.
     public void Anim_ActivateJump()
     {
+        //Create temporary directional variables
         float X, Y;
 
-        //(Horizontal movement for the jump already set by normal movement)
+        //Horizontal movement for the jump set by current movement (Maybe change to set values based on input)
         X = RB2.velocity.x;
         //Vertical movement based on jump speed
         Y = JumpSpeed;
@@ -49,7 +61,7 @@ public class Fighter_Mov : MonoBehaviour
         SetMovement(traj);
     }
 
-    //Allows Fighter to move itself under normal circumstances
+    //Fighter horizontal movement under normal circumstances (Walking or falling)
     public void Standard_Movement(int xIn, int yIn, bool jump)
     {
         //Create temporary directional variables
@@ -67,6 +79,7 @@ public class Fighter_Mov : MonoBehaviour
         SetMovement(traj);
     }
 
+    //Fighter vertical movement under normal circumstances (Acceleration due to gravity)
     public void Gravity_Update()
     {
         //Accelerate gravity based on time passed
@@ -77,34 +90,33 @@ public class Fighter_Mov : MonoBehaviour
         SetMovement(traj);
     }
 
+    //Recieves a vertical and horizontal speed to move, and sets rigidbody to move in that direction
     private void SetMovement(Vector3 trajectory)
     {
-        //Recieves a vertical and horizontal speed to move, in the form of a vector 2 or 3
+        
         RB2.velocity = trajectory;
     }
 
-    /// <summary>
-    /// Launches the fighter in the direction received.
-    /// </summary>
-    /// <param name="trajectory"></param>
-    /// <param name="right"></param>
-    public void Damage_Launch(Vector3 trajectory, bool right)
+    /// <summary> Launches the fighter in the direction received. Vertical launch si ignored unless the move is a luancher. </summary>
+    /// <param name="trajectory"></param> <param name="Hitbox_facingRight"></param>
+    public void Damage_Launch(Vector3 trajectory, bool Hitbox_facingRight)
     {
         if (grounded) //And not a launcher
             trajectory.y = 0;
-        if (right)
+        if (Hitbox_facingRight)
             RB2.velocity = trajectory;
-        else
+        else //Flip trajectory horizontally if hitbox faces left
             RB2.velocity = Vector3.Reflect(trajectory, Vector3.left);
     }
 
-    //Override velocity if up against the wall
+    //Override horizontal velocity if up against the wall. Called by FighterInput when CanBackup is false.
     public void WallMovement(bool onRight)
     {
         if (onRight ^ RB2.velocity.x < 0)
             RB2.velocity = new Vector3(0, RB2.velocity.y);
     }
 
+    //Freezes fighter movement while retaining momentum, or restores said momentum
     public void FreezeMovement(bool freeze)
     {
         if(freeze)

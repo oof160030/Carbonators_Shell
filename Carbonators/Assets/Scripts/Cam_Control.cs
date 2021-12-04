@@ -9,6 +9,11 @@ public class Cam_Control : MonoBehaviour
     public Transform fighter1, fighter2; //References to the two fighter's positions
     Vector3 Cam_Pos = new Vector3(0,0,-10); //The last valid position of the camera.
 
+    public void Init(Transform f1, Transform f2)
+    {
+        fighter1 = f1; fighter2 = f2;
+    }
+
     void Update()
     {
         //Update camera position every other frame
@@ -20,17 +25,7 @@ public class Cam_Control : MonoBehaviour
     {
         //SET CAMERA HORIZONTAL POSITION
         //Get the distance between the two fighters, and set the default horiz. camera position directly between them.
-        float xDist = Mathf.Abs(fighter1.position.x - fighter2.position.x);
         Cam_Pos.x = Mathf.Clamp((fighter1.position.x + fighter2.position.x) / 2.0f, -5.5f, 5.5f);
-        /*
-        //When the fighters are closer than 4 units, only move if the camera is too far from the further fighter
-        if (xDist < 4)
-        {
-            float range = (4 - xDist) / 2.0f;
-
-            Cam_Pos.x = Mathf.Clamp(transform.position.x, Cam_Pos.x - range, Cam_Pos.x + range);
-        }
-        */
 
         //SET CAMERA VERTICAL POSITION
         //Set y position to track highest fighter's position

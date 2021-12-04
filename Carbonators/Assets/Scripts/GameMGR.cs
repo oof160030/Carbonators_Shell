@@ -14,63 +14,22 @@ public class GameMGR : MonoBehaviour
     public TextMeshProUGUI P1_HP, P2_HP; //Access to the (placeholder) HP markers (may be moved to a seperate UI controller?)
     void Start()
     {
-        //Get access to the two fighters, and sets their inital positions.
-        //(Should be replaced by spawning in the 2 fighters itself)
-        //GameObject[] fighters = GameObject.FindGameObjectsWithTag("Player");
-
+        //Instnatiate and save access to the two fighters.
         fighter1 = Instantiate(fighterPrefab).GetComponent<Fighter_Input>();
         fighter2 = Instantiate(fighterPrefab).GetComponent<Fighter_Input>();
 
-        /*
-        if (fighters[0].transform.position.x < fighters[1].transform.position.x)
-        {
-            fighter1 = fighters[0].GetComponent<Fighter_Input>();
-            fighter2 = fighters[1].GetComponent<Fighter_Input>();
-            fighter1.Set_OnRight(false); fighter2.Set_OnRight(true);
-        }
-        else if (fighters[0].transform.position.x > fighters[1].transform.position.x)
-        {
-            fighter2 = fighters[0].GetComponent<Fighter_Input>();
-            fighter1 = fighters[1].GetComponent<Fighter_Input>();
-            fighter2.Set_OnRight(false); fighter1.Set_OnRight(true);
-        }
-        */
-
-        //Gives the fighters access to the manager instance
+        //Initialize the two fighters, give them acces to this manager and each other
         fighter1.Init(this, true, fighter2); fighter2.Init(this, false, fighter1);
 
-        CC.fighter1 = fighter1.transform;
-        CC.fighter2 = fighter2.transform;
-
+        //Give camera access to the fighters as well
+        CC.Init(fighter1.transform, fighter2.transform);
     }
 
     // Update is called once per frame
     void Update()
     {
-        //Tell fighters their relative positions.
-        bool firstOnRight = true;
-        if(fighter1.transform.position.x < fighter2.transform.position.x)
-        {
-            fighter1.Set_OnRight(false); fighter2.Set_OnRight(true);
-            firstOnRight = false;
-        }
-        else if (fighter1.transform.position.x > fighter2.transform.position.x)
-        {
-            fighter2.Set_OnRight(false); fighter1.Set_OnRight(true);
-            firstOnRight = true;
-        }
-
-        //If both fighters are too far away, don't let them move apart
-        if (Mathf.Abs(fighter1.transform.position.x - fighter2.transform.position.x) > 15)
-        {
-            fighter1.CanBackUp = false;
-            fighter2.CanBackUp = false;
-        }
-        else
-        {
-            fighter1.CanBackUp = true;
-            fighter2.CanBackUp = true;
-        }
+        //Have fighters update their relative positions.
+        fighter1.UpdateRelativePositionValues(); fighter2.UpdateRelativePositionValues();
 
         //If both fighters are grounded and too close, move them away from each other.
         if (Mathf.Abs(fighter1.transform.position.x - fighter2.transform.position.x) < 2 && fighter1.Get_IsGrounded() && fighter2.Get_IsGrounded())
@@ -109,11 +68,9 @@ public class GameMGR : MonoBehaviour
                     fighter2.transform.position = fighter1.transform.position + new Vector3(2, 0);
             }
         }
-        
-
     }
 
-    public void updateHealthUI(int port, float health)
+    public void PH_updateHealthUI(int port, float health)
     {
         if (port == 1)
             P1_HP.text = "P1: " + health;

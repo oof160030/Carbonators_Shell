@@ -42,26 +42,11 @@ public class Fighter_Input : MonoBehaviour
     //Positioning Variables
     private bool facingLeft = true; //Stores if the fighter is currently facing left
     private bool onRight = true; //Stores whether the fighter is currently further right than the opponent
+    private int touchingWall = 0;
     public bool CanBackUp = true; //When false, the fighter is too close to the wall behind them to back up. Will be used to determine pushback.
     public bool gravityOn = true; //Determines if gravity is currently affecting the fighter
 
     // Reads player input frame by frame. References the fighter's moves and physics through seperate scripts.
-    void Start()
-    {
-
-        /*SR = GetComponent<SpriteRenderer>();
-        AR = GetComponent<Animator>();
-
-        F_AnimCtrl = GetComponent<Fighter_AnimControl>(); F_AnimCtrl.Init(AR);
-        F_Mov = GetComponent<Fighter_Mov>(); F_Mov.Initialize(this, AR);
-        F_Atk = GetComponent<Fighter_Attack>(); F_Atk.Initialize(PortNumber, this,  AR, F_AnimCtrl);
-        F_HitDet = GetComponentInChildren<Fighter_HitDetection>(); F_HitDet.Init(PortNumber, this);
-        F_Stats = GetComponent<Fighter_Stats>(); F_Stats.Init(this);
-        
-        priorStickPos = 5; stickPos = 5;
-        */
-    }
-
     public void Init(GameMGR manager, bool playerOne, Fighter_Input enemy)
     {
         //Reconnect to manager
@@ -108,7 +93,7 @@ public class Fighter_Input : MonoBehaviour
 
         F_AnimCtrl = GetComponent<Fighter_AnimControl>(); F_AnimCtrl.Init(AR);
         F_Mov = GetComponent<Fighter_Mov>(); F_Mov.Initialize(this, AR);
-        F_Atk = GetComponent<Fighter_Attack>(); F_Atk.Initialize(PortNumber, this, AR, F_AnimCtrl);
+        F_Atk = GetComponent<Fighter_Attack>(); F_Atk.Init(PortNumber, this, F_AnimCtrl);
         F_HitDet = GetComponentInChildren<Fighter_HitDetection>(); F_HitDet.Init(PortNumber, this);
         F_Stats = GetComponent<Fighter_Stats>(); F_Stats.Init(this);
 
@@ -158,8 +143,6 @@ public class Fighter_Input : MonoBehaviour
             if (jump && Get_IsGrounded())
             {
                 F_AnimCtrl.SetTrigger("Jump");
-                //AR.SetTrigger("Jump");
-                //F_AnimCtrl.Jump_AnimTimer = 6;
             }
 
             //Manually move the player, if they are able to be controlled
@@ -176,10 +159,24 @@ public class Fighter_Input : MonoBehaviour
         //Update player movement if the current fighter cannot back up
         if (!CanBackUp)
             F_Mov.WallMovement(onRight);
-
     }
 
+    #region //[2] Trigger functions
+    private void OnTriggerEnter2D(Collider2D collision)
+    {
+        if ((collision.gameObject.CompareTag("LeftWall") && !facingLeft) || (collision.gameObject.CompareTag("RightWall") && facingLeft))
+            touchingWall = (facingLeft ? 1 : -1);
+    }
+    private void OnTriggerExit2D(Collider2D collision)
+    {
+        if (collision.gameObject.CompareTag("LeftWall") || collision.gameObject.CompareTag("RightWall"))
+            touchingWall = 0;
+    }
+    #endregion
+
+    #region //[2] Manage character facing parameters, and updating their relative position
     //Update character facing
+    /// <summary> Updates player facing and sprite/hurtbox flip based on their relative position and ground state. </summary>
     private void UpdateFacing()
     {
         //Set facing direction if on ground and direction has changed 
@@ -191,10 +188,26 @@ public class Fighter_Input : MonoBehaviour
         Hurtbox_TF.localScale = new Vector3((facingLeft ? -1 : 1), 1, 1);
     }
 
-    #region //[4]INPUT UPDATES - Methods that track or evaluate player input
-    /// <summary>
-    /// Tracks joystick position and duration, sets numerical position
-    /// </summary>
+    /// <summary> Updates the fighters On_Right variables, and whether the fighter can back up </summary>
+    public void UpdateRelativePositionValues()
+    {
+        //Update relative position parameters
+        if (transform.position.x > Opponent.transform.position.x && !onRight)
+            Set_OnRight(true);
+        else if (transform.position.x < Opponent.transform.position.x && onRight)
+            Set_OnRight(false);
+
+        //Update whether the fighter can backup
+        //Fighter can't back up if too far from opponent
+        if (Mathf.Abs(transform.position.x - Opponent.transform.position.x) > 15 || touchingWall != 0)
+            CanBackUp = false;
+        else
+            CanBackUp = true;
+    }
+    #endregion
+
+    #region //[4] INPUT UPDATES - Methods that track or evaluate player input
+    /// <summary> Tracks joystick position and duration, sets numerical position </summary>
     public void UpdateStick()
     {
         //Read player inputs
@@ -216,9 +229,7 @@ public class Fighter_Input : MonoBehaviour
             pos_duration = Mathf.Clamp(pos_duration + Time.deltaTime,0,3);
         }
     }
-    /// <summary>
-    /// Check when face buttons are pressed / released, tracks input duration
-    /// </summary>
+    /// <summary> Check when face buttons are pressed / released, tracks input duration </summary>
     public void UpdateButtons()
     {
         //Increase time buttons have been in the current state, up to 3 seconds
@@ -236,9 +247,7 @@ public class Fighter_Input : MonoBehaviour
             ADuration = 0;
         }
     }
-    /// <summary>
-    /// Sets Joystick X and Y axes, and generates jump inputs
-    /// </summary>
+    /// <summary> Sets Joystick X and Y axes, and generates jump inputs </summary>
     private void UpdateJoystickAxes()
     {
         Stick_X = 0; Stick_Y = 0;
@@ -247,9 +256,7 @@ public class Fighter_Input : MonoBehaviour
 
         jump = (pos_changed && Stick_Y > 0 && priorStickPos < 7);
     }
-    /// <summary>
-    /// Determines if fighter is holding forward or back relative to direction they're facing
-    /// </summary>
+    /// <summary> Determines if fighter is holding forward or back relative to direction they're facing </summary>
     /// <returns> X Axis integer (-1, 0, 1) </returns>
     private int Relative_X()
     {
@@ -257,10 +264,8 @@ public class Fighter_Input : MonoBehaviour
     }
     #endregion
 
-    //Manage state changes based on moves and taking damage
-    /// <summary>
-    /// Validates requests to change the fighter's state - activates some animation triggers 
-    /// </summary>
+    #region //[2] Manage state changes based on moves and taking damage
+    /// <summary> Validates requests to change the fighter's state - activates some animation triggers  </summary>
     /// <param name="newState"></param>
     private void Change_State(FighterState newState)
     {
@@ -357,9 +362,7 @@ public class Fighter_Input : MonoBehaviour
                 break;
         }
     }
-    /// <summary>
-    /// Allows child Fighter Attack Script to request state change, since Change_State is private
-    /// </summary>
+    /// <summary> Allows child Fighter Attack Script to request state change, since Change_State is private </summary>
     /// <param name="setToAttack"></param>
     public void SetAttackState(bool setToAttack)
     {
@@ -369,7 +372,11 @@ public class Fighter_Input : MonoBehaviour
         else if (!setToAttack && F_State == FighterState.ATTACK)
             Change_State(FighterState.NEUTRAL);
     }
+    #endregion
 
+    #region //[2] Calls that manage damage states and pushback
+    /// <summary> Called by hurtbox to apply damage to the fighter. Also checks for blocking and initiates pushback </summary>
+    /// <param name="HB_Data"></param> <param name="hitbox_facing_right"></param> <param name="Attacker"></param>
     public void Damaged(SO_Hitbox HB_Data, bool hitbox_facing_right, Fighter_Input Attacker)
     {
         bool blocked_attack = false;
@@ -405,6 +412,11 @@ public class Fighter_Input : MonoBehaviour
 
             //Launch the fighter (using mov script)
             F_Mov.Damage_Launch(HB_Data.HB_Knockback, hitbox_facing_right);
+
+            //Push the attacker if against the wall
+            if(!CanBackUp)
+                Attacker.Block_Pushback(HB_Data, hitbox_facing_right);
+
             Set_HitStopTime(HB_Data.hitStop);
         }
         //If the attack WAS blocked, play block animation and push the fighter
@@ -423,16 +435,18 @@ public class Fighter_Input : MonoBehaviour
         }
     }
 
-    /// <summary>
-    /// Pushes the fighter backwards when they are grounded and hitting an opponent against the wall.
-    /// </summary>
-    /// <param name="HB_Data"></param>
-    /// <param name="hb_facing_right"></param>
+    /// <summary> Pushes the fighter backwards when they are grounded and hitting an opponent against the wall. </summary>
+    /// <param name="HB_Data"></param> <param name="hb_facing_right"></param>
     public void Block_Pushback(SO_Hitbox HB_Data, bool hb_facing_right)
     {
         if(Get_IsGrounded()) //May check if grounded before defender calls this method
+        {
             F_Mov.Damage_Launch(HB_Data.HB_Knockback, !hb_facing_right); //Remember - knockback is reversed in this case!
+            Debug.Log("Should Pushback");
+        }
+            
     }
+    #endregion
 
     #region//[2] Set Functions, used to set variables without exposing them
     /// <summary>

@@ -32,7 +32,10 @@ public class Active_Hitbox : MonoBehaviour
         current_lifespan += Time.deltaTime;
         if (current_lifespan >= HB_Data.HB_lifespan)
         {
-            if(!permanant) Destroy(gameObject); else gameObject.SetActive(false);
+            if(!permanant)
+                Destroy(gameObject);
+            else
+                gameObject.SetActive(false);
         }
     }
 
@@ -41,24 +44,25 @@ public class Active_Hitbox : MonoBehaviour
         return HB_Data;
     }
 
-    public bool Get_Facing()
+    public bool Get_FacingRight()
     {
         return facingRight;
     }
 
-    public bool Get_HitState()
+    public bool Get_HitStatus()
     {
         return hit;
     }
 
-    public Fighter_Input Get_Owner()
+    public Fighter_Input Get_OwnerFInput()
     {
         return OwnerScript;
     }
 
-    public void Set_HitState(bool state)
+    public void Set_HitStatus(bool state)
     {
         hit = state;
-        OwnerScript.Set_HitStopTime(HB_Data.hitStop);
+        if(hit)
+            OwnerScript.Set_HitStopTime(HB_Data.hitStop);
     }
 }
