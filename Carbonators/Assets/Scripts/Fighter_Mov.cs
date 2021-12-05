@@ -13,12 +13,7 @@ public class Fighter_Mov : MonoBehaviour
     public float gravityAcc;
     public bool grounded;
     private Vector3 saveTraj;
-    
-    void Start()
-    {
-        //RB2 = GetComponent<Rigidbody2D>();
-        //GC = GetComponentInChildren<GroundCheck>();
-    }
+    public int JumpX = 0; //Stores the x input provided when the jump was input (Set by Parent_FInput)
 
     public void Initialize(Fighter_Input Finput, Animator Anim)
     {
@@ -26,13 +21,6 @@ public class Fighter_Mov : MonoBehaviour
         AR = Anim;
         RB2 = GetComponent<Rigidbody2D>();
         GC = GetComponentInChildren<GroundCheck>(); GC.Init(this);
-    }
-
-    private void Update()
-    {
-        //Check if the fighter is grounded
-        //grounded = GC.overlap;
-        //AR.SetBool("Grounded", grounded);
     }
 
     //Sets the player's grounded state, and sends the appropriate signal to the animator. Called by groundcheck (GC) script
@@ -48,8 +36,8 @@ public class Fighter_Mov : MonoBehaviour
         //Create temporary directional variables
         float X, Y;
 
-        //Horizontal movement for the jump set by current movement (Maybe change to set values based on input)
-        X = RB2.velocity.x;
+        //Horizontal movement for the jump set by x input when jump triggered.
+        X = WalkSpeed * JumpX;
         //Vertical movement based on jump speed
         Y = JumpSpeed;
 
@@ -93,8 +81,13 @@ public class Fighter_Mov : MonoBehaviour
     //Recieves a vertical and horizontal speed to move, and sets rigidbody to move in that direction
     private void SetMovement(Vector3 trajectory)
     {
-        
         RB2.velocity = trajectory;
+    }
+
+    //Freeze velocity along specific axis of movement
+    public void StopAxisMovement(bool FreezeX, bool FreezeY)
+    {
+        RB2.velocity = new Vector3(FreezeX ? 0 : RB2.velocity.x, FreezeY ? 0 : RB2.velocity.y);
     }
 
     /// <summary> Launches the fighter in the direction received. Vertical launch si ignored unless the move is a luancher. </summary>
@@ -129,4 +122,6 @@ public class Fighter_Mov : MonoBehaviour
             RB2.velocity = saveTraj;
         }
     }
+
+    public void Set_JumpX(int X) { JumpX = X; }
 }

@@ -16,3 +16,6 @@ MonoBehaviour:
   hitbox:
   - {fileID: 11400000, guid: 3c47397bdba70cd40948ddf2e834c3ae, type: 2}
   - {fileID: 11400000, guid: 713410469595a444f892f3fccb8d9efe, type: 2}
+  - {fileID: 11400000, guid: 997f9e5f1cc74bf469769d6ed4833ab6, type: 2}
+  - {fileID: 11400000, guid: f806fe7d4b4cdf1418e2e588714cf865, type: 2}
+  - {fileID: 11400000, guid: 2cc3c200fb889ae4abda4880c570e3a7, type: 2}

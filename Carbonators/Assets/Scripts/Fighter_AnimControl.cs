@@ -12,7 +12,8 @@ public class Fighter_AnimControl : MonoBehaviour
     {
         AR = fighterAR;
         Timers = new Anim_TriggerTimer[]
-        { new Anim_TriggerTimer("A_Pressed", fighterAR), 
+        { new Anim_TriggerTimer("A_Pressed", fighterAR),
+            new Anim_TriggerTimer("B_Pressed", fighterAR),
             new Anim_TriggerTimer("Jump", fighterAR), 
             new Anim_TriggerTimer("Block", fighterAR), 
             new Anim_TriggerTimer("Unblock", fighterAR),

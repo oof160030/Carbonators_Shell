@@ -14,8 +14,8 @@ public class SO_Hitbox : ScriptableObject
     public Vector3 HB_position;
     [Tooltip("Damage the hitbox deals to its target")]
     public int HB_damage;
-    [Tooltip("The time in seconds the hitbox persists for if not interacted with.")]
-    public float HB_lifespan;
+    [Tooltip("The number of frames the hitbox persists for if not interacted with.")]
+    public int HB_lifespan;
     [Tooltip("The direction the hitbox will send the opponent on contact. Assumes right facing.")]
     public Vector3 HB_Knockback;
     [Tooltip("The number of frames the attacker's and defender's animations pause for on hit.")]

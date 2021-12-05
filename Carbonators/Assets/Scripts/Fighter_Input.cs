@@ -11,8 +11,8 @@ public class Fighter_Input : MonoBehaviour
 
     //Fighter State - Referenced to keep track of what the fighter is currently doing and influence if inputs are received.
     public FighterState F_State;
-    private float stunTime = 0; //Duration used for various stun effects
-    public float hitStopTime = 0; //Duration used for attack impacts
+    private float stunTime = 0; //Duration used for various stun effects, in seconds
+    public float hitStopTime = 0; //Duration used for attack impacts, in frames
 
     //Child components
     private Fighter_Mov F_Mov; //Controls fighter movement
@@ -35,6 +35,7 @@ public class Fighter_Input : MonoBehaviour
     private float pos_duration; //Stores the time the current stick position has been held, up to 3 seconds
     private int Stick_X, Stick_Y; //Stores the horizontal and vertical axes (-1, 0, 1) seperately
     private bool jump;
+    
     //Button variables
     private bool APressed, BPressed, CPressed; //Detects whether the button is currently being pressed or not
     private float ADuration, BDuration, CDuration; //Tracks how long the button has been pressed/released. When duration=0, has just changed
@@ -143,13 +144,14 @@ public class Fighter_Input : MonoBehaviour
             if (jump && Get_IsGrounded())
             {
                 F_AnimCtrl.SetTrigger("Jump");
+                F_Mov.Set_JumpX(Stick_X);
             }
 
             //Manually move the player, if they are able to be controlled
             F_Mov.Standard_Movement(Stick_X, Stick_Y, jump);
 
             //Check which command inputs, if any, the player has generated
-            F_Atk.CheckMoveList((APressed && ADuration == 0), (F_Mov.grounded && stickPos < 4));
+            F_Atk.CheckMoveList(APressed, ADuration, BPressed, BDuration);
         }
 
         //Update speed based on gravity UNLESS fighter is in hitstop or animating with keyframes.
@@ -234,18 +236,14 @@ public class Fighter_Input : MonoBehaviour
     {
         //Increase time buttons have been in the current state, up to 3 seconds
         ADuration = Mathf.Clamp(ADuration+Time.deltaTime,0,3);
+        BDuration = Mathf.Clamp(BDuration + Time.deltaTime, 0, 3);
 
-        //Check if a button has just been pressed or released
-        if(Input.GetKeyDown(A))
-        {
-            APressed = true;
-            ADuration = 0;
-        }
-        else if(Input.GetKeyUp(A))
-        {
-            APressed = false;
-            ADuration = 0;
-        }
+        //Check if each button has just been pressed or released
+        if (Input.GetKeyDown(A)) { APressed = true; ADuration = 0; }
+        else if(Input.GetKeyUp(A)) { APressed = false; ADuration = 0; }
+
+        if (Input.GetKeyDown(B)) { BPressed = true; BDuration = 0; }
+        else if (Input.GetKeyUp(B)) { BPressed = false; BDuration = 0; }
     }
     /// <summary> Sets Joystick X and Y axes, and generates jump inputs </summary>
     private void UpdateJoystickAxes()
@@ -296,24 +294,29 @@ public class Fighter_Input : MonoBehaviour
                 else if (newState == FighterState.ATTACK)
                 {
                     F_State = FighterState.ATTACK;
+                    if (Get_IsGrounded())
+                        F_Mov.StopAxisMovement(true, false);
                 }
                 break;
 
-            case FighterState.ATTACK:
+            case FighterState.ATTACK: //Disable Hitbox if it already exists
                 //Attack >> Neutral
                 if (newState == FighterState.NEUTRAL)
                 {
                     F_State = FighterState.NEUTRAL;
+                    F_Atk.DisableHitbox();
                 }
                 //Attack >> Hitstun
                 else if (newState == FighterState.HITSTUN)
                 {
                     F_State = FighterState.HITSTUN;
+                    F_Atk.DisableHitbox();
                 }
                 //Attack >> Tumble
                 else if (newState == FighterState.TUMBLE)
                 {
                     F_State = FighterState.TUMBLE;
+                    F_Atk.DisableHitbox();
                 }
                 break;
 
@@ -441,8 +444,8 @@ public class Fighter_Input : MonoBehaviour
     {
         if(Get_IsGrounded()) //May check if grounded before defender calls this method
         {
-            F_Mov.Damage_Launch(HB_Data.HB_Knockback, !hb_facing_right); //Remember - knockback is reversed in this case!
-            Debug.Log("Should Pushback");
+            //Always pushes back along the x only - distance is based on magnitude of attack's normal knockback
+            F_Mov.Damage_Launch(Vector3.right*HB_Data.HB_Knockback.magnitude, !hb_facing_right);
         }
             
     }
@@ -473,7 +476,7 @@ public class Fighter_Input : MonoBehaviour
     }
     #endregion
 
-    #region//[4] Get Functions, used to control access to variables
+    #region//[5] Get Functions, used to control access to variables
     public GameMGR Get_MGR()
     {
         return MGR;
@@ -493,6 +496,11 @@ public class Fighter_Input : MonoBehaviour
     public FighterState Get_FighterState()
     {
         return F_State;
+    }
+
+    public Fighter_Attack Get_FAtk()
+    {
+        return F_Atk;
     }
     #endregion
 }

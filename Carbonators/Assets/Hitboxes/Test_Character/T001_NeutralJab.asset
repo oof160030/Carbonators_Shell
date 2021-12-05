@@ -13,12 +13,12 @@ MonoBehaviour:
   m_Name: T001_NeutralJab
   m_EditorClassIdentifier: 
   IDNum: 0
-  sizeX: 1.65
-  sizeY: 0.5
-  HB_position: {x: 1.25, y: 2.7, z: 0}
+  sizeX: 1.25
+  sizeY: 0.6
+  HB_position: {x: 1.3, y: 2.7, z: 0}
   HB_damage: 10
-  HB_lifespan: 0.1
+  HB_lifespan: 6
   HB_Knockback: {x: 3, y: 6, z: 0}
-  hitStop: 10
+  hitStop: 5
   hitStun: 30
   blockStun: 15
