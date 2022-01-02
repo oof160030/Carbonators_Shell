@@ -171,7 +171,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 007f0fb2d6858074980c5693ad0b14db, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  MGR: {fileID: 0}
   F_State: 0
   hitStopTime: 0
   PortNumber: 1
@@ -199,10 +198,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9a3d24c2c0af42842adbe8e669afaca4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  WalkSpeed: 5
-  JumpSpeed: 10
-  gravityAcc: 20
+  WalkSpeed: 8
+  JumpSpeed: 28
+  gravityAcc: 70
   grounded: 0
+  JumpX: 0
 --- !u!114 &233469455
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -218,6 +218,7 @@ MonoBehaviour:
   HBox_List: {fileID: 11400000, guid: c1dbf7a851a1bed439046c98bc9f35a7, type: 2}
   HitboxPrefab: {fileID: 1271978318752110309, guid: b84733f23cbd6314587421bf9f2b644f,
     type: 3}
+  MyHB_Data: {fileID: 0}
 --- !u!114 &3993480779855622005
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -243,10 +244,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5c50e5e7e72909e4bb203eb864c832d8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  Block_AnimTimer: 0
-  Unblock_AnimTimer: 0
-  Light_AnimTimer: 0
-  Jump_AnimTimer: 0
 --- !u!1 &1358124135880336352
 GameObject:
   m_ObjectHideFlags: 0
