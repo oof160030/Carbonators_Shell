@@ -84,6 +84,13 @@ public class Fighter_Mov : MonoBehaviour
         RB2.velocity = trajectory;
     }
 
+    // Set player velocity by one axis without changing the others (WIP)
+    private void SetMovementByAxis(bool setX, bool setY, float X, float Y)
+    {
+        Vector3 traj = new Vector3((setX ? X : RB2.velocity.x), (setY ? Y : RB2.velocity.y));
+        SetMovement(traj);
+    }
+
     //Freeze velocity along specific axis of movement
     public void StopAxisMovement(bool FreezeX, bool FreezeY)
     {
