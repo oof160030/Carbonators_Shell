@@ -83,6 +83,7 @@ public class Fighter_Input : MonoBehaviour
             DOWN = KeyCode.F;
             LEFT = KeyCode.D;
             RIGHT = KeyCode.G;
+            //A = KeyCode.A; - testing move trading here
             A = KeyCode.A;
             B = KeyCode.S;
             C = KeyCode.Q;

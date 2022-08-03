@@ -16,6 +16,8 @@ public class SO_Hitbox : ScriptableObject
     public int HB_damage;
     [Tooltip("The number of frames the hitbox persists for if not interacted with.")]
     public int HB_lifespan;
+    [Tooltip("If a move connects with multiple hitboxes, the one with the highest priority takes effect.")]
+    public int HB_priority;
     [Tooltip("The direction the hitbox will send the opponent on contact. Assumes right facing.")]
     public Vector3 HB_Knockback;
     [Tooltip("The number of frames the attacker's and defender's animations pause for on hit.")]

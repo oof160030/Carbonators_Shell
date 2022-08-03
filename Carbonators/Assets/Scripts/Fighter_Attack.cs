@@ -50,10 +50,22 @@ public class Fighter_Attack : MonoBehaviour
     /// Transfer attack request from animator to FighterInput, (to change to attack or neutral state)
     /// </summary>
     /// <param name="state"></param>
-    public void InitiateAttack(int state)
+    public void InitiateAttack(int state) //DEPRECIATED
     {
         //Request Fighter Input change to attack state
         parent_FInput.SetAttackState(state == 1);
+    }
+
+    public void ANIMATOR_AttackStart()
+    {
+        //Request Fighter Input change to neutral state
+        parent_FInput.SetAttackState(true);
+    }
+
+    public void ANIMATOR_AttackEnd()
+    {
+        //Request Fighter Input change to neutral state
+        parent_FInput.SetAttackState(false);
     }
 
     /// <summary> Creates a hitbox, based on a provided hitbox code. </summary>
@@ -81,6 +93,33 @@ public class Fighter_Attack : MonoBehaviour
             TempHB_Data.InitializeHitbox(HB, parent_FInput, owner, parent_FInput.Get_FacingRight());
         }
     }
+
+    /* WIP - Hitbox request system using two parameters (one for hitbox number, one for move number)
+     * To allow for moves with multiple hitboxes
+    public void CreateHitbox(int moveCode, int boxCode)
+    {
+        //Identify the referenced hitbox - only attempt if the referenced hitbox exists
+        if (HBox_List.hitbox.Length > boxCode)
+        {
+            //Retreive the matching hitbox
+            SO_Hitbox HB = HBox_List.hitbox[boxCode];
+
+            //Instantiate the hitbox in the expected position if facing right
+            if (parent_FInput.Get_FacingRight())
+                TempHitbox = Instantiate(HitboxPrefab, transform.position + HB.HB_position, Quaternion.identity, transform);
+            else
+            {
+                //Flip the hitbox position if the fighter is facing right
+                Vector3 pos_inverse = new Vector3(-HB.HB_position.x, HB.HB_position.y);
+                TempHitbox = Instantiate(HitboxPrefab, transform.position + pos_inverse, Quaternion.identity, transform);
+            }
+
+            //Give the hitbox access to the scriptable object storing its data
+            TempHB_Data = TempHitbox.GetComponent<Active_Hitbox>();
+            TempHB_Data.InitializeHitbox(HB, parent_FInput, owner, parent_FInput.Get_FacingRight());
+        }
+    }
+    */
 
     /// <summary> Activates the player's dedicated hitbox, and gives it parameters based on a provided hitbox code. </summary>
     /// <param name="boxCode"></param>
