@@ -14,6 +14,7 @@ public class Fighter_Attack : MonoBehaviour
     private Active_Hitbox MyHB_Data; //The hitbox script of the dedicated player hitbox
     private GameObject TempHitbox; //Gameobject access to the temporary hitbox spawned
     private Active_Hitbox TempHB_Data;
+    //public GameObject Projectiles;
 
     private int owner; //The player associated with the fighter | 1 = player 1 | 2 = player 2
     private Fighter_Input parent_FInput; //The fighter input object on the same object
@@ -36,14 +37,16 @@ public class Fighter_Attack : MonoBehaviour
     }
 
     //References the player's inputs once a button is pressed or released, and activates a move based on the results
-    public void CheckMoveList(bool AIsPressed, float ATime, bool BIsPressed, float BTime)
+    public void CheckMoveList(bool AIsPressed, float ATime, bool BIsPressed, float BTime, bool CIsPressed, float CTime)
     {
         if (AIsPressed && ATime == 0)
-        {
             F_AC.SetTrigger("A_Pressed");
-        }
+
         if (BIsPressed && BTime == 0)
             F_AC.SetTrigger("B_Pressed");
+
+        if (CIsPressed && CTime == 0)
+            F_AC.SetTrigger("C_Pressed");
     }
 
     /// <summary>
@@ -66,6 +69,11 @@ public class Fighter_Attack : MonoBehaviour
     {
         //Request Fighter Input change to neutral state
         parent_FInput.SetAttackState(false);
+    }
+
+    public void ANIMATOR_SummonProjectile()
+    {
+
     }
 
     /// <summary> Creates a hitbox, based on a provided hitbox code. </summary>

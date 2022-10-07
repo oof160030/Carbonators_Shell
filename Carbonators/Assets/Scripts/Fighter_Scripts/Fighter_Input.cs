@@ -83,7 +83,6 @@ public class Fighter_Input : MonoBehaviour
             DOWN = KeyCode.F;
             LEFT = KeyCode.D;
             RIGHT = KeyCode.G;
-            //A = KeyCode.A; - testing move trading here
             A = KeyCode.A;
             B = KeyCode.S;
             C = KeyCode.Q;
@@ -152,7 +151,7 @@ public class Fighter_Input : MonoBehaviour
             F_Mov.Standard_Movement(Stick_X, Stick_Y, jump);
 
             //Check which command inputs, if any, the player has generated
-            F_Atk.CheckMoveList(APressed, ADuration, BPressed, BDuration);
+            F_Atk.CheckMoveList(APressed, ADuration, BPressed, BDuration, CPressed, CDuration);
         }
 
         //Update speed based on gravity UNLESS fighter is in hitstop or animating with keyframes.
@@ -245,6 +244,9 @@ public class Fighter_Input : MonoBehaviour
 
         if (Input.GetKeyDown(B)) { BPressed = true; BDuration = 0; }
         else if (Input.GetKeyUp(B)) { BPressed = false; BDuration = 0; }
+
+        if (Input.GetKeyDown(C)) { CPressed = true; CDuration = 0; }
+        else if (Input.GetKeyUp(C)) { CPressed = false; CDuration = 0; }
     }
     /// <summary> Sets Joystick X and Y axes, and generates jump inputs </summary>
     private void UpdateJoystickAxes()

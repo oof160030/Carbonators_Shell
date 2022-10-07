@@ -14,6 +14,7 @@ public class Fighter_AnimControl : MonoBehaviour
         Timers = new Anim_TriggerTimer[]
         { new Anim_TriggerTimer("A_Pressed", fighterAR),
             new Anim_TriggerTimer("B_Pressed", fighterAR),
+            new Anim_TriggerTimer("C_Pressed", fighterAR),
             new Anim_TriggerTimer("Jump", fighterAR), 
             new Anim_TriggerTimer("Block", fighterAR), 
             new Anim_TriggerTimer("Unblock", fighterAR),
@@ -34,11 +35,17 @@ public class Fighter_AnimControl : MonoBehaviour
     //Activate a specific timer, based on its name
     public void SetTrigger(string trigger)
     {
+        bool found = false;
         foreach(Anim_TriggerTimer T in Timers)
         {
-            if(T.Get_TriggerName() == trigger)
+            if(found)
+            {
+                //Nothing
+            }
+            else if(T.Get_TriggerName() == trigger)
             {
                 T.SetTrigger();
+                found = true;
             }
         }
     }
