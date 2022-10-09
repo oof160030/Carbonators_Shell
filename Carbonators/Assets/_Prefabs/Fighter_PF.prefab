@@ -219,6 +219,7 @@ MonoBehaviour:
   HitboxPrefab: {fileID: 1271978318752110309, guid: b84733f23cbd6314587421bf9f2b644f,
     type: 3}
   MyHB_Data: {fileID: 0}
+  MyProjectiles: {fileID: 11400000, guid: f3995bbef9cdb0a47a6da557eff7b890, type: 2}
 --- !u!114 &3993480779855622005
 MonoBehaviour:
   m_ObjectHideFlags: 0

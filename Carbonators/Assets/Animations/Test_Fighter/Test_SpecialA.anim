@@ -1226,7 +1226,7 @@ AnimationClip:
     intParameter: 0
     messageOptions: 0
   - time: 0.13333334
-    functionName: 
+    functionName: ANIMATOR_SummonProjectile
     data: 
     objectReferenceParameter: {fileID: 0}
     floatParameter: 0

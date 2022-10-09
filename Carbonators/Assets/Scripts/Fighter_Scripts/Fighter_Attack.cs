@@ -14,7 +14,7 @@ public class Fighter_Attack : MonoBehaviour
     private Active_Hitbox MyHB_Data; //The hitbox script of the dedicated player hitbox
     private GameObject TempHitbox; //Gameobject access to the temporary hitbox spawned
     private Active_Hitbox TempHB_Data;
-    //public GameObject Projectiles;
+    public SO_ProjectileList MyProjectiles;
 
     private int owner; //The player associated with the fighter | 1 = player 1 | 2 = player 2
     private Fighter_Input parent_FInput; //The fighter input object on the same object
@@ -71,9 +71,24 @@ public class Fighter_Attack : MonoBehaviour
         parent_FInput.SetAttackState(false);
     }
 
-    public void ANIMATOR_SummonProjectile()
+    public void ANIMATOR_SummonProjectile(int projectile_id)
     {
+        //Check list of available projeciltes
+        if(MyProjectiles.projectile.Length > projectile_id)
+        {
+            //If present, call the method to spawn that projectile
+            spawnProjectile(MyProjectiles.projectile[projectile_id]);
+        }
+    }
 
+    private void spawnProjectile(SO_Projectile P_data)
+    {
+        Vector2 startPos = new Vector2(parent_FInput.Get_FacingRight() ? P_data.P_SpawnPosition.x : -P_data.P_SpawnPosition.x , P_data.P_SpawnPosition.y);
+        //Instantiate object (with reference) in crrect position
+        GameObject temp = Instantiate(P_data.GO_Projectile, transform.position + (Vector3)startPos, Quaternion.identity);
+        //Pass gameobject information in initiation script
+        Projectile_Proto P = temp.GetComponent<Projectile_Proto>();
+        P.Init(P_data.P_Hitboxes, !parent_FInput.Get_FacingRight(), parent_FInput, P_data);
     }
 
     /// <summary> Creates a hitbox, based on a provided hitbox code. </summary>
