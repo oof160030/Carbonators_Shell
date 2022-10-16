@@ -12,13 +12,18 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d4ede335868a12e44a044cf0b0f1bc80, type: 3}
   m_Name: T004_AirLowJab
   m_EditorClassIdentifier: 
-  IDNum: 4
+  Move_IDNum: 4
+  Box_IDNum: 0
   sizeX: 0.85
   sizeY: 1.18
   HB_position: {x: 1.3, y: 0.85, z: 0}
   HB_damage: 5
   HB_lifespan: 8
+  HB_priority: 0
   HB_Knockback: {x: 4, y: -10, z: 0}
   hitStop: 3
   hitStun: 8
   blockStun: 5
+  HB_HighLow: 0
+  HB_LaunchProperty: 0
+  HB_Properties: 

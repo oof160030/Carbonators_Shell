@@ -1263,11 +1263,11 @@ AnimationClip:
     intParameter: 1
     messageOptions: 0
   - time: 0.3
-    functionName: CreateHitbox
+    functionName: ANIMATOR_CreateHitbox
     data: 
     objectReferenceParameter: {fileID: 0}
     floatParameter: 0
-    intParameter: 4
+    intParameter: 400
     messageOptions: 0
   - time: 0.55
     functionName: InitiateAttack

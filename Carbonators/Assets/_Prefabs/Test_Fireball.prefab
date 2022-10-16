@@ -116,5 +116,5 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: da88b90ce8dd87748b5e7f9832d8efe6, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  prefab_hbox: {fileID: 1271978318752110309, guid: b84733f23cbd6314587421bf9f2b644f,
+  HitboxPrefab: {fileID: 1271978318752110309, guid: b84733f23cbd6314587421bf9f2b644f,
     type: 3}

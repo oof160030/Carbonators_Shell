@@ -10,20 +10,20 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: d4ede335868a12e44a044cf0b0f1bc80, type: 3}
-  m_Name: T002_FowardJab
+  m_Name: T009_AirLowHeavy
   m_EditorClassIdentifier: 
-  Move_IDNum: 2
+  Move_IDNum: 9
   Box_IDNum: 0
-  sizeX: 0.56
-  sizeY: 1.72
-  HB_position: {x: 1.4, y: 3, z: 0}
-  HB_damage: 15
-  HB_lifespan: 8
-  HB_priority: 0
-  HB_Knockback: {x: 2, y: 6, z: 0}
-  hitStop: 3
+  sizeX: 1.4
+  sizeY: 1.75
+  HB_position: {x: 0.9, y: 1.16, z: 0}
+  HB_damage: 0
+  HB_lifespan: 5
+  HB_priority: 1
+  HB_Knockback: {x: 1, y: -8, z: 0}
+  hitStop: 5
   hitStun: 8
-  blockStun: 5
+  blockStun: 6
   HB_HighLow: 0
   HB_LaunchProperty: 0
   HB_Properties: 

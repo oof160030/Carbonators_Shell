@@ -12,13 +12,18 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d4ede335868a12e44a044cf0b0f1bc80, type: 3}
   m_Name: T006_LowHeavy
   m_EditorClassIdentifier: 
-  IDNum: 6
+  Move_IDNum: 6
+  Box_IDNum: 0
   sizeX: 1.25
   sizeY: 1.27
   HB_position: {x: 1.3, y: 0.7, z: 0}
   HB_damage: 0
   HB_lifespan: 20
+  HB_priority: 0
   HB_Knockback: {x: 5, y: -20, z: 0}
   hitStop: 15
   hitStun: 15
   blockStun: 5
+  HB_HighLow: 0
+  HB_LaunchProperty: 0
+  HB_Properties: 

@@ -10,15 +10,20 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: d4ede335868a12e44a044cf0b0f1bc80, type: 3}
-  m_Name: T009_AirHeavy2
+  m_Name: T008B_AirHeavy2
   m_EditorClassIdentifier: 
-  IDNum: 9
+  Move_IDNum: 8
+  Box_IDNum: 1
   sizeX: 1.4
   sizeY: 0.7
   HB_position: {x: 1.624, y: 2.298, z: 0}
   HB_damage: 15
   HB_lifespan: 7
+  HB_priority: 0
   HB_Knockback: {x: 35, y: 5, z: 0}
   hitStop: 30
   hitStun: 12
   blockStun: 12
+  HB_HighLow: 0
+  HB_LaunchProperty: 0
+  HB_Properties: 

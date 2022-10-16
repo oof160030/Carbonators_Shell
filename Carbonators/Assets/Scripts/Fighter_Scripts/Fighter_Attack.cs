@@ -2,6 +2,9 @@
 using System.Collections.Generic;
 using UnityEngine;
 
+public enum HitboxProperties {PROJECTILE, PIERCING, PIERCING_LITE, GROUNDED, NON_GROUNDED};
+public enum HitboxHeight {MID, HIGH, LOW, FIERCE};
+public enum HitboxLaunch {AIR_ONLY, NO_GRAV, GRAVITY}
 public class Fighter_Attack : MonoBehaviour
 {
     // Recieves input from Fighter Input, and executes attacks based on the inputs provided. Descriptions updated 10/3
@@ -71,6 +74,26 @@ public class Fighter_Attack : MonoBehaviour
         parent_FInput.SetAttackState(false);
     }
 
+    public void ANIMATOR_CreateHitbox(int MovNum_BoxNum)
+    {
+        //seperate hitbox and move numbers
+        int MN = 0; int BN = 0;
+        MN = MovNum_BoxNum / 100;
+        BN = MovNum_BoxNum % 100;
+
+        CreateHitbox(MN, BN);
+    }
+
+    public void ANIMATOR_ActivateHitbox(int MovNum_BoxNum)
+    {
+        //seperate hitbox and move numbers
+        int MN = 0; int BN = 0;
+        MN = MovNum_BoxNum / 100;
+        BN = MovNum_BoxNum % 100;
+
+        ActivateHitbox(MN, BN);
+    }
+
     public void ANIMATOR_SummonProjectile(int projectile_id)
     {
         //Check list of available projeciltes
@@ -93,7 +116,7 @@ public class Fighter_Attack : MonoBehaviour
 
     /// <summary> Creates a hitbox, based on a provided hitbox code. </summary>
     /// <param name="boxCode"></param>
-    public void CreateHitbox(int boxCode)
+    public void CreateHitbox(int boxCode) //DEPRECIATED
     {
         //Identify the referenced hitbox - only attempt if the referenced hitbox exists
         if(HBox_List.hitbox.Length > boxCode)
@@ -116,37 +139,39 @@ public class Fighter_Attack : MonoBehaviour
             TempHB_Data.InitializeHitbox(HB, parent_FInput, owner, parent_FInput.Get_FacingRight());
         }
     }
-
-    /* WIP - Hitbox request system using two parameters (one for hitbox number, one for move number)
-     * To allow for moves with multiple hitboxes
+    
     public void CreateHitbox(int moveCode, int boxCode)
     {
-        //Identify the referenced hitbox - only attempt if the referenced hitbox exists
-        if (HBox_List.hitbox.Length > boxCode)
+        bool found = false;
+
+        foreach (SO_Hitbox H in HBox_List.hitbox)
         {
-            //Retreive the matching hitbox
-            SO_Hitbox HB = HBox_List.hitbox[boxCode];
-
-            //Instantiate the hitbox in the expected position if facing right
-            if (parent_FInput.Get_FacingRight())
-                TempHitbox = Instantiate(HitboxPrefab, transform.position + HB.HB_position, Quaternion.identity, transform);
-            else
+            if(!found && H.Move_IDNum == moveCode && H.Box_IDNum == boxCode)
             {
-                //Flip the hitbox position if the fighter is facing right
-                Vector3 pos_inverse = new Vector3(-HB.HB_position.x, HB.HB_position.y);
-                TempHitbox = Instantiate(HitboxPrefab, transform.position + pos_inverse, Quaternion.identity, transform);
-            }
+                found = true;
+                //Retreive the matching hitbox
+                SO_Hitbox HB = H;
 
-            //Give the hitbox access to the scriptable object storing its data
-            TempHB_Data = TempHitbox.GetComponent<Active_Hitbox>();
-            TempHB_Data.InitializeHitbox(HB, parent_FInput, owner, parent_FInput.Get_FacingRight());
+                //Instantiate the hitbox in the expected position if facing right
+                if (parent_FInput.Get_FacingRight())
+                    TempHitbox = Instantiate(HitboxPrefab, transform.position + HB.HB_position, Quaternion.identity, transform);
+                else
+                {
+                    //Flip the hitbox position if the fighter is facing right
+                    Vector3 pos_inverse = new Vector3(-HB.HB_position.x, HB.HB_position.y);
+                    TempHitbox = Instantiate(HitboxPrefab, transform.position + pos_inverse, Quaternion.identity, transform);
+                }
+
+                //Give the hitbox access to the scriptable object storing its data
+                TempHB_Data = TempHitbox.GetComponent<Active_Hitbox>();
+                TempHB_Data.InitializeHitbox(HB, parent_FInput, owner, parent_FInput.Get_FacingRight());
+            }
         }
     }
-    */
 
     /// <summary> Activates the player's dedicated hitbox, and gives it parameters based on a provided hitbox code. </summary>
     /// <param name="boxCode"></param>
-    public void ActivateHitbox(int boxCode)
+    public void ActivateHitbox(int boxCode) //DEPRECIATED
     {
         //Identify the referenced hitbox - only attempt if the referenced hitbox exists
         if (HBox_List.hitbox.Length > boxCode)
@@ -172,6 +197,37 @@ public class Fighter_Attack : MonoBehaviour
         }
     }
 
+    public void ActivateHitbox(int moveCode, int boxCode)
+    {
+        bool found = false;
+
+        foreach (SO_Hitbox H in HBox_List.hitbox)
+        {
+            if (!found && H.Move_IDNum == moveCode && H.Box_IDNum == boxCode)
+            {
+                found = true;
+                //Retreive the matching hitbox
+                SO_Hitbox HB = H;
+
+                //NOTE: Position will be determined by the animator in this case
+
+                //Give the hitbox access to the scriptable object storing its data
+                MyHitbox.SetActive(true);
+                MyHB_Data.InitializeHitbox(HB, parent_FInput, owner, parent_FInput.Get_FacingRight());
+
+                //TEMP: Instantiate the hitbox in the expected position if facing right
+                if (parent_FInput.Get_FacingRight())
+                    MyHitbox.transform.position = transform.position + HB.HB_position;
+                else
+                {
+                    //Flip the hitbox position if the fighter is facing right
+                    Vector3 pos_inverse = new Vector3(-HB.HB_position.x, HB.HB_position.y);
+                    MyHitbox.transform.position = transform.position + pos_inverse;
+                }
+            }
+        }
+    }
+
     public void DisableHitbox()
     {
         if (MyHitbox.activeInHierarchy)
@@ -183,4 +239,12 @@ public class Fighter_Attack : MonoBehaviour
             TempHitbox = null;
         }    
     }
+
+    public int Get_PortNum()
+    {
+        return owner;
+    }    
+
+
+
 }

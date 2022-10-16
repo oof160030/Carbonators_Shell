@@ -1379,11 +1379,11 @@ AnimationClip:
     intParameter: 1
     messageOptions: 0
   - time: 0.33333334
-    functionName: CreateHitbox
+    functionName: ANIMATOR_CreateHitbox
     data: 
     objectReferenceParameter: {fileID: 0}
     floatParameter: 0
-    intParameter: 7
+    intParameter: 700
     messageOptions: 0
   - time: 0.59999996
     functionName: InitiateAttack

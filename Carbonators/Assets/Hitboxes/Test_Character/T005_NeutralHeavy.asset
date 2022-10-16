@@ -12,13 +12,18 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d4ede335868a12e44a044cf0b0f1bc80, type: 3}
   m_Name: T005_NeutralHeavy
   m_EditorClassIdentifier: 
-  IDNum: 5
+  Move_IDNum: 5
+  Box_IDNum: 0
   sizeX: 1.16
   sizeY: 1.05
   HB_position: {x: 1.9, y: 1.7, z: 0}
   HB_damage: 15
   HB_lifespan: 15
+  HB_priority: 0
   HB_Knockback: {x: 20, y: 5, z: 0}
   hitStop: 10
   hitStun: 10
   blockStun: 10
+  HB_HighLow: 0
+  HB_LaunchProperty: 0
+  HB_Properties: 

@@ -10,16 +10,20 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: d4ede335868a12e44a044cf0b0f1bc80, type: 3}
-  m_Name: T010_AirLowHeavy
+  m_Name: T008A_AirHeavy1
   m_EditorClassIdentifier: 
-  IDNum: 10
-  sizeX: 1.4
-  sizeY: 1.75
-  HB_position: {x: 0.9, y: 1.16, z: 0}
-  HB_damage: 0
+  Move_IDNum: 8
+  Box_IDNum: 0
+  sizeX: 1
+  sizeY: 1
+  HB_position: {x: -1.17, y: 0.68, z: 0}
+  HB_damage: 10
   HB_lifespan: 5
-  HB_priority: 1
-  HB_Knockback: {x: 1, y: -8, z: 0}
-  hitStop: 5
-  hitStun: 8
-  blockStun: 6
+  HB_priority: 0
+  HB_Knockback: {x: -5, y: 15, z: 0}
+  hitStop: 30
+  hitStun: 12
+  blockStun: 12
+  HB_HighLow: 0
+  HB_LaunchProperty: 0
+  HB_Properties: 

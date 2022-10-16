@@ -15,7 +15,8 @@ MonoBehaviour:
   P_IDNum: 0
   GO_Projectile: {fileID: 2169401009775396897, guid: e3750a7a5d6822342bee30cbf56c13f3,
     type: 3}
-  P_Hitboxes: []
+  P_Hitboxes:
+  - {fileID: 11400000, guid: ebee671050339e144a4e2c43c2c2e847, type: 2}
   P_SpawnPosition: {x: 1.66, y: 2.76}
   P_MoveDirection: {x: 1, y: 0}
   P_MoveSpeed: 5

@@ -7,12 +7,12 @@ public class Projectile_Proto : MonoBehaviour
     protected SO_Projectile SO_Proj;
     protected SO_Hitbox[] P_hitboxes;
     protected bool facing_left;
-    protected Fighter_Input owner;
+    protected Fighter_Input parent_FInput;
     protected Fighter_Attack F_atk;
     protected float remaining_lifetime; //Duration to persist in seconds
     protected Rigidbody2D RB2;
     [SerializeField]
-    protected GameObject prefab_hbox; //Base model hitbox - used to spawn all other hitboxes.
+    protected GameObject HitboxPrefab; //Base model hitbox - used to spawn all other hitboxes.
 
     //Default Initiation
     public void Init()
@@ -27,8 +27,8 @@ public class Projectile_Proto : MonoBehaviour
         System.Array.Copy(SO_H, P_hitboxes, SO_H.Length);
         
         facing_left = facing;
-        owner = origin;
-        F_atk = owner.Get_FAtk();
+        parent_FInput = origin;
+        F_atk = parent_FInput.Get_FAtk();
         remaining_lifetime = SOP.P_Lifetime;
         RB2 = gameObject.GetComponent<Rigidbody2D>();
     }
@@ -65,5 +65,62 @@ public class Projectile_Proto : MonoBehaviour
             remaining_lifetime -= Time.fixedDeltaTime*60;
         if (remaining_lifetime <= 0)
             Destroy(gameObject);
+    }
+
+    public GameObject CreateHitBox(int moveCode, int boxCode)
+    {
+        bool found = false;
+        GameObject TempHitbox = null;
+
+        foreach (SO_Hitbox H in P_hitboxes)
+        {
+            if (!found && H.Move_IDNum == moveCode && H.Box_IDNum == boxCode)
+            {
+                found = true;
+                //Retreive the matching hitbox
+                SO_Hitbox HB = P_hitboxes[boxCode];
+                Active_Hitbox TempHB_Data;
+
+                //Instantiate the hitbox in the expected position if facing right
+                if (!facing_left)
+                    TempHitbox = Instantiate(HitboxPrefab, transform.position + HB.HB_position, Quaternion.identity, transform);
+                else
+                {
+                    //Flip the hitbox position if the fighter is facing right
+                    Vector3 pos_inverse = new Vector3(-HB.HB_position.x, HB.HB_position.y);
+                    TempHitbox = Instantiate(HitboxPrefab, transform.position + pos_inverse, Quaternion.identity, transform);
+                }
+
+                //Give the hitbox access to the scriptable object storing its data
+                TempHB_Data = TempHitbox.GetComponent<Active_Hitbox>();
+                TempHB_Data.InitializeHitbox(HB, parent_FInput, F_atk.Get_PortNum(), parent_FInput.Get_FacingRight());
+            }
+        }
+        return TempHitbox;
+
+        /*Identify the referenced hitbox - only attempt if the referenced hitbox exists
+        if (P_hitboxes.Length > boxCode)
+        {
+            //Retreive the matching hitbox
+            SO_Hitbox HB = P_hitboxes[boxCode];
+            GameObject TempHitbox;
+            Active_Hitbox TempHB_Data;
+
+            //Instantiate the hitbox in the expected position if facing right
+            if (!facing_left)
+                TempHitbox = Instantiate(HitboxPrefab, transform.position + HB.HB_position, Quaternion.identity, transform);
+            else
+            {
+                //Flip the hitbox position if the fighter is facing right
+                Vector3 pos_inverse = new Vector3(-HB.HB_position.x, HB.HB_position.y);
+                TempHitbox = Instantiate(HitboxPrefab, transform.position + pos_inverse, Quaternion.identity, transform);
+            }
+
+            //Give the hitbox access to the scriptable object storing its data
+            TempHB_Data = TempHitbox.GetComponent<Active_Hitbox>();
+            TempHB_Data.InitializeHitbox(HB, parent_FInput, F_atk.Get_PortNum(), parent_FInput.Get_FacingRight());
+            return TempHitbox;
+        }
+        */
     }
 }

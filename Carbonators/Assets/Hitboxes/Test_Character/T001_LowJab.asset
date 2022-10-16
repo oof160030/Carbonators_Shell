@@ -12,13 +12,18 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d4ede335868a12e44a044cf0b0f1bc80, type: 3}
   m_Name: T001_LowJab
   m_EditorClassIdentifier: 
-  IDNum: 1
+  Move_IDNum: 1
+  Box_IDNum: 0
   sizeX: 1
   sizeY: 0.7
   HB_position: {x: 1.15, y: 1.55, z: 0}
   HB_damage: 5
   HB_lifespan: 8
+  HB_priority: 0
   HB_Knockback: {x: 4, y: 0, z: 0}
   hitStop: 20
   hitStun: 30
   blockStun: 15
+  HB_HighLow: 0
+  HB_LaunchProperty: 0
+  HB_Properties: 

@@ -1923,18 +1923,18 @@ AnimationClip:
     intParameter: 1
     messageOptions: 0
   - time: 0.083333336
-    functionName: CreateHitbox
+    functionName: ANIMATOR_CreateHitbox
     data: 
     objectReferenceParameter: {fileID: 0}
     floatParameter: 0
-    intParameter: 8
+    intParameter: 800
     messageOptions: 0
   - time: 0.33333334
-    functionName: CreateHitbox
+    functionName: ANIMATOR_CreateHitbox
     data: 
     objectReferenceParameter: {fileID: 0}
     floatParameter: 0
-    intParameter: 9
+    intParameter: 801
     messageOptions: 0
   - time: 0.5
     functionName: ANIMATOR_AttackEnd
