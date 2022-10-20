@@ -10,16 +10,20 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: d4ede335868a12e44a044cf0b0f1bc80, type: 3}
-  m_Name: T011_TestProjectile
+  m_Name: T010B_SpecB2
   m_EditorClassIdentifier: 
-  IDNum: 0
-  sizeX: 0
-  sizeY: 0
-  HB_position: {x: 0, y: 0, z: 0}
-  HB_damage: 0
-  HB_lifespan: 0
+  Move_IDNum: 10
+  Box_IDNum: 1
+  sizeX: 1.51
+  sizeY: 3.26
+  HB_position: {x: 1.16, y: 2.17, z: 0}
+  HB_damage: 15
+  HB_lifespan: 8
   HB_priority: 0
-  HB_Knockback: {x: 0, y: 0, z: 0}
-  hitStop: 0
+  HB_Knockback: {x: 5, y: -15, z: 0}
+  hitStop: 10
   hitStun: 0
-  blockStun: 0
+  blockStun: 3
+  HB_HighLow: 0
+  HB_LaunchProperty: 0
+  HB_Properties: 

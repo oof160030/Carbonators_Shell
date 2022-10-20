@@ -150,8 +150,12 @@ public class Fighter_Input : MonoBehaviour
             //Manually move the player, if they are able to be controlled
             F_Mov.Standard_Movement(Stick_X, Stick_Y, jump);
 
-            //Check which command inputs, if any, the player has generated
+            //Check which command inputs, if any, the player has generated (Should this still only be called when not in hitstop?)
             F_Atk.CheckMoveList(APressed, ADuration, BPressed, BDuration, CPressed, CDuration);
+        }
+        else if(F_State == FighterState.ATTACK && hitStopTime == 0)
+        {
+            F_Mov.SetMovementByAnimator();
         }
 
         //Update speed based on gravity UNLESS fighter is in hitstop or animating with keyframes.
@@ -396,6 +400,9 @@ public class Fighter_Input : MonoBehaviour
             //Deduct health
             F_Stats.Take_Damage(HB_Data.HB_damage);
 
+            //Reset any animator movement alterations
+            F_Mov.ANIMATOR_ResetAnimMovement();
+
             //If hit on the ground, change fighter state to hitstun, and set duration of the stun
             if(Get_IsGrounded())
             {
@@ -417,7 +424,7 @@ public class Fighter_Input : MonoBehaviour
                 AR.SetTrigger("Hurt_Grounded");
 
             //Launch the fighter (using mov script)
-            F_Mov.Damage_Launch(HB_Data.HB_Knockback, hitbox_facing_right);
+            F_Mov.Damage_Launch(HB_Data.HB_Knockback, hitbox_facing_right, HB_Data);
 
             //Push the attacker if against the wall
             if(!CanBackUp)
@@ -435,7 +442,7 @@ public class Fighter_Input : MonoBehaviour
 
             //Push self away, OR push the attacker if against the wall
             if(CanBackUp)
-                F_Mov.Damage_Launch(HB_Data.HB_Knockback, hitbox_facing_right);
+                F_Mov.Damage_Launch(HB_Data.HB_Knockback, hitbox_facing_right, HB_Data);
             else
                 Attacker.Block_Pushback(HB_Data, hitbox_facing_right);
         }
@@ -448,7 +455,7 @@ public class Fighter_Input : MonoBehaviour
         if(Get_IsGrounded()) //May check if grounded before defender calls this method
         {
             //Always pushes back along the x only - distance is based on magnitude of attack's normal knockback
-            F_Mov.Damage_Launch(Vector3.right*HB_Data.HB_Knockback.magnitude, !hb_facing_right);
+            F_Mov.Damage_Launch(Vector3.right*HB_Data.HB_Knockback.magnitude, !hb_facing_right, HB_Data);
         }
             
     }
