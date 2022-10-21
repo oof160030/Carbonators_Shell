@@ -14,6 +14,8 @@ public class Fighter_Mov : MonoBehaviour
     public bool grounded;
     private Vector3 saveTraj;
     public int JumpX = 0; //Stores the x input provided when the jump was input (Set by Parent_FInput)
+    private int BounceCount, BounceMax;
+    private bool GBouncing, WBouncing;
 
     public bool ANIM_ACTIVE;
     public Vector3 ANIM_XY; //The character movement direction requested by the animator
@@ -27,16 +29,31 @@ public class Fighter_Mov : MonoBehaviour
         RB2 = GetComponent<Rigidbody2D>();
         GC = GetComponentInChildren<GroundCheck>(); GC.Init(this);
         ANIM_UseGRAV = true;
+
+        BounceMax = 1;
+        BounceCount = 0;
     }
 
     //Sets the player's grounded state, and sends the appropriate signal to the animator. Called by groundcheck (GC) script
     public void Set_Grounded(bool isGrounded)
     {
-        grounded = isGrounded;
-        AR.SetBool("Grounded", grounded);
+        //If fighter is in grounde bounce-knockback state, and has not bounced yet, bounce off the ground
+        if(GBouncing && BounceCount < BounceMax)
+        {
+            BounceCount++; GBouncing = false;
+            SetMovement(Vector3.Reflect(RB2.velocity, Vector3.up)); //Reverse vertical momentum
+            ANIMATOR_SetJumpVariables(); //Set jump variables for ground check object
+            AR.SetTrigger("Hurt_Ground_Launch"); //Set animator to launch upwards off ground
+            parent_FInput.Set_GravityOn(true); //Turn the gravity back on
+        }
+        else
+        {
+            //Hit the ground if the player cannot ground bounce
+            grounded = isGrounded;
+            AR.SetBool("Grounded", grounded);
+            BounceCount = 0;
+        }
     }
-
-    
 
     //Fighter horizontal movement under normal circumstances (Walking or falling)
     public void Standard_Movement(int xIn, int yIn, bool jump)
@@ -183,4 +200,9 @@ public class Fighter_Mov : MonoBehaviour
     }
 
     public void Set_JumpX(int X) { JumpX = X; }
+    public void Set_IsGBouncing(bool B) { GBouncing = B; }
+    public void Set_IsWBouncing(bool B) { WBouncing = B; }
+
+    public float Get_SpeedX() { return RB2.velocity.x; }
+    public float Get_SpeedY() { return RB2.velocity.y; }
 }

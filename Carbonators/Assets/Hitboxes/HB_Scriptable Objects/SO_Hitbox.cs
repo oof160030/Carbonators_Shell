@@ -34,4 +34,6 @@ public class SO_Hitbox : ScriptableObject
     public HitboxLaunch HB_LaunchProperty;
     [Tooltip("A list of all hitbox effects applied: if move is a projectile; if move partially or fully ignores barrier; if move hits only grounded or aerial targets.")]
     public HitboxProperties[] HB_Properties;
+    [Tooltip("Determines which bounce state the hitbox puts the player in, if it is a launcher. If this is not 'none,' LaunchProperty should be No_Grav.")]
+    public HitboxBounceType HB_BounceProperty;
 }

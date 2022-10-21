@@ -159,12 +159,16 @@ public class Fighter_Input : MonoBehaviour
         }
 
         //Update speed based on gravity UNLESS fighter is in hitstop or animating with keyframes.
-        if(hitStopTime == 0)
+        if(hitStopTime == 0 && gravityOn)
             F_Mov.Gravity_Update();
 
         //Update player movement if the current fighter cannot back up
         if (!CanBackUp)
             F_Mov.WallMovement(onRight);
+
+        //Update animator movement variables
+        AR.SetFloat("XSpeed", F_Mov.Get_SpeedX());
+        AR.SetFloat("YSpeed", F_Mov.Get_SpeedY());
     }
 
     #region //[2] Trigger functions
@@ -406,18 +410,39 @@ public class Fighter_Input : MonoBehaviour
             //If hit on the ground, change fighter state to hitstun, and set duration of the stun
             if(Get_IsGrounded())
             {
-                Change_State(FighterState.HITSTUN);
-                stunTime = HB_Data.hitStun / 60.0f;
+                if(HB_Data.HB_LaunchProperty == HitboxLaunch.AIR_ONLY)
+                {
+                    Change_State(FighterState.HITSTUN);
+                    stunTime = HB_Data.hitStun / 60.0f;
+                }
+                else
+                    Change_State(FighterState.TUMBLE);
             }
             //If hit in the air, change to tumble state until the fighter lands
             else if(!Get_IsGrounded())
             {
                 Change_State(FighterState.TUMBLE);
             }
+            //if the hitbox is a no_grav hitbox, turn off gravity
+            if (HB_Data.HB_LaunchProperty == HitboxLaunch.NO_GRAV)
+                Set_GravityOn(false);
+
+            //Tell Fighter_Mov whether the character is in a bounce state
+            if (HB_Data.HB_BounceProperty == HitboxBounceType.GROUND)
+            {
+                F_Mov.Set_IsGBouncing(true);
+                F_Mov.ANIMATOR_SetJumpVariables(); //Deactivates ground states in movement script, in case the fighter is already grounded.
+            }
+            else if (HB_Data.HB_BounceProperty == HitboxBounceType.WALL)
+                F_Mov.Set_IsWBouncing(true);
 
             //Trigger the correct damage animation based on groundedness and crouch status
-            if (!Get_IsGrounded())
+            if (HB_Data.HB_BounceProperty != HitboxBounceType.NONE)
+                AR.SetTrigger("Hurt_Launch_NoGrav");
+            else if (!Get_IsGrounded())
                 AR.SetTrigger("Hurt_Air");
+            else if (Get_IsGrounded() && HB_Data.HB_LaunchProperty != HitboxLaunch.AIR_ONLY) //Use special air launch animation when grounded and launched
+                AR.SetTrigger("Hurt_Ground_Launch");
             else if (Stick_Y == -1)
                 AR.SetTrigger("Hurt_Crouching");
             else
@@ -484,9 +509,14 @@ public class Fighter_Input : MonoBehaviour
             F_AnimCtrl.SetAnimSpeed(0);
         }
     }
+
+    public void Set_GravityOn(bool G)
+    {
+        gravityOn = G;
+    }
     #endregion
 
-    #region//[5] Get Functions, used to control access to variables
+    #region//[6] Get Functions, used to control access to variables
     public GameMGR Get_MGR()
     {
         return MGR;

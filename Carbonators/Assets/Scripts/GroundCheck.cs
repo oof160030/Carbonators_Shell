@@ -19,8 +19,8 @@ public class GroundCheck : MonoBehaviour
         //Resets the groundcheck if the hitbox is overlapping the ground and not currently set to touch the ground
         if (collision.CompareTag("Ground") && !overlap)
         {
-            groundStay += Time.deltaTime;
-            if (groundStay > 3)
+            groundStay += Time.deltaTime*60;
+            if (groundStay > 15)
             {
                 overlap = true;
                 groundStay = 0;

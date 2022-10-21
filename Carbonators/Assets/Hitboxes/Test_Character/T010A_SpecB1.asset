@@ -22,8 +22,9 @@ MonoBehaviour:
   HB_priority: 0
   HB_Knockback: {x: 5, y: 20, z: 0}
   hitStop: 15
-  hitStun: 0
+  hitStun: 60
   blockStun: 0
   HB_HighLow: 0
   HB_LaunchProperty: 2
   HB_Properties: 
+  HB_BounceProperty: 0

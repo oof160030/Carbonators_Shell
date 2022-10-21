@@ -4,7 +4,8 @@ using UnityEngine;
 
 public enum HitboxProperties {PROJECTILE, PIERCING, PIERCING_LITE, GROUNDED, NON_GROUNDED};
 public enum HitboxHeight {MID, HIGH, LOW, FIERCE};
-public enum HitboxLaunch {AIR_ONLY, NO_GRAV, GRAVITY}
+public enum HitboxLaunch {AIR_ONLY, NO_GRAV, GRAVITY};
+public enum HitboxBounceType { NONE, WALL, GROUND};
 public class Fighter_Attack : MonoBehaviour
 {
     // Recieves input from Fighter Input, and executes attacks based on the inputs provided. Descriptions updated 10/3
