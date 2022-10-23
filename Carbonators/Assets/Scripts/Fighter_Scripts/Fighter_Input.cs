@@ -164,8 +164,10 @@ public class Fighter_Input : MonoBehaviour
 
         //Update player movement if the current fighter cannot back up
         if (!CanBackUp)
+        {
             F_Mov.WallMovement(onRight);
-
+            F_Mov.Touching_Wall(!onRight);
+        }
         //Update animator movement variables
         AR.SetFloat("XSpeed", F_Mov.Get_SpeedX());
         AR.SetFloat("YSpeed", F_Mov.Get_SpeedY());
@@ -431,7 +433,7 @@ public class Fighter_Input : MonoBehaviour
             if (HB_Data.HB_BounceProperty == HitboxBounceType.GROUND)
             {
                 F_Mov.Set_IsGBouncing(true);
-                F_Mov.ANIMATOR_SetJumpVariables(); //Deactivates ground states in movement script, in case the fighter is already grounded.
+                //F_Mov.ANIMATOR_SetJumpVariables(); //Deactivates ground states in movement script, in case the fighter is already grounded.
             }
             else if (HB_Data.HB_BounceProperty == HitboxBounceType.WALL)
                 F_Mov.Set_IsWBouncing(true);
@@ -450,9 +452,10 @@ public class Fighter_Input : MonoBehaviour
 
             //Launch the fighter (using mov script)
             F_Mov.Damage_Launch(HB_Data.HB_Knockback, hitbox_facing_right, HB_Data);
+            //Maybe perform a bounce check?
 
             //Push the attacker if against the wall
-            if(!CanBackUp)
+            if(!CanBackUp && HB_Data.HB_BounceProperty != HitboxBounceType.WALL)
                 Attacker.Block_Pushback(HB_Data, hitbox_facing_right);
 
             Set_HitStopTime(HB_Data.hitStop);
@@ -513,6 +516,11 @@ public class Fighter_Input : MonoBehaviour
     public void Set_GravityOn(bool G)
     {
         gravityOn = G;
+    }
+
+    public void Set_Vulnerability_F_HitDet(bool isVulnerable)
+    {
+        F_HitDet.SetVulnStatus(isVulnerable);
     }
     #endregion
 

@@ -38,7 +38,7 @@ public class Fighter_Mov : MonoBehaviour
     public void Set_Grounded(bool isGrounded)
     {
         //If fighter is in grounde bounce-knockback state, and has not bounced yet, bounce off the ground
-        if(GBouncing && BounceCount < BounceMax)
+        if(GBouncing && BounceCount < BounceMax && isGrounded)
         {
             BounceCount++; GBouncing = false;
             SetMovement(Vector3.Reflect(RB2.velocity, Vector3.up)); //Reverse vertical momentum
@@ -51,8 +51,32 @@ public class Fighter_Mov : MonoBehaviour
             //Hit the ground if the player cannot ground bounce
             grounded = isGrounded;
             AR.SetBool("Grounded", grounded);
-            BounceCount = 0;
+            if (isGrounded)
+            {
+                BounceCount = 0;
+                parent_FInput.Set_Vulnerability_F_HitDet(true);
+            }
         }
+    }
+
+    public void Touching_Wall(bool leftWall)
+    {
+        //On contact with wall, check if in wall bounce state
+        if(WBouncing && parent_FInput.hitStopTime == 0)
+        {
+            if (BounceCount >= BounceMax)
+                parent_FInput.Set_Vulnerability_F_HitDet(false);
+
+            Vector3 Dir = new Vector3(10, 25);
+            BounceCount++; WBouncing = false;
+            AR.SetTrigger("Hurt_Air");
+            if (leftWall)
+                SetMovement(Dir);
+            else
+                SetMovement(Vector3.Reflect(Dir, Vector3.left));
+            parent_FInput.Set_GravityOn(true); //Turn the gravity back on
+        }
+        //Else, initiate invincible bounce
     }
 
     //Fighter horizontal movement under normal circumstances (Walking or falling)
@@ -113,7 +137,7 @@ public class Fighter_Mov : MonoBehaviour
         Y = JumpSpeed;
 
         //Set grounded states for ground check (prevents rejumps)
-        grounded = false; GC.overlap = false;
+        grounded = false; GC.groundOverlap = false;
 
         //Set trajectory of fighter and apply to rigidbody
         Vector3 traj = new Vector3(X, Y);
@@ -143,7 +167,7 @@ public class Fighter_Mov : MonoBehaviour
     public void ANIMATOR_SetJumpVariables()
     {
         //Set grounded states for ground check (prevents rejumps)
-        grounded = false; GC.overlap = false;
+        grounded = false; GC.groundOverlap = false;
     }
 
     //Set character velocity based on animator variable
@@ -196,6 +220,7 @@ public class Fighter_Mov : MonoBehaviour
         else
         {
             RB2.velocity = saveTraj;
+            //Debug.Log("Restored Velocity");
         }
     }
 

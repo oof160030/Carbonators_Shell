@@ -25,5 +25,6 @@ MonoBehaviour:
   hitStun: 5
   blockStun: 5
   HB_HighLow: 0
-  HB_LaunchProperty: 0
+  HB_LaunchProperty: 1
   HB_Properties: 
+  HB_BounceProperty: 1

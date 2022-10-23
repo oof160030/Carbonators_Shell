@@ -14,11 +14,16 @@ public class Fighter_HitDetection : MonoBehaviour
     Fighter_Input hBox_Owner_FInput;
     int hBox_Priority;
 
+    //Determines if fighter can be hit
+    bool Vulnerable;
+    public GameObject H1, H2, H3, H4;
+
     public void Init(int port, Fighter_Input Finput)
     {
         owner = port;
         F_In = Finput;
         hBox_Priority = -1;
+        Vulnerable = true;
     }
 
     private void Update()
@@ -75,5 +80,17 @@ public class Fighter_HitDetection : MonoBehaviour
         hBox_facing_right = true;
         hBox_Owner_FInput = null;
         hBox_Priority = -1;
+    }
+
+    public void SetVulnStatus(bool isVulnerable)
+    {
+        if(isVulnerable != Vulnerable)
+        {
+            Vulnerable = isVulnerable;
+            H1.SetActive(isVulnerable);
+            H2.SetActive(isVulnerable);
+            H3.SetActive(isVulnerable);
+            H4.SetActive(isVulnerable);
+        }
     }
 }
