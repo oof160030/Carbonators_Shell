@@ -5,7 +5,8 @@ using UnityEngine;
 public enum FighterState {NEUTRAL, ATTACK, BLOCK, HITSTUN, HITSTOP, TUMBLE, GROUNDED, STUN, DEAD, ANIMATING, LOCKED};
 public class Fighter_Input : MonoBehaviour
 {
-    //The master script for each fighter, responsible for calling all other scripts
+    //==FIGHTER_INPUT: The master script for each fighter, responsible for calling all other scripts==
+
     private GameMGR MGR;
     private Fighter_Input Opponent; //Script for the opposing fighter
 
@@ -103,10 +104,12 @@ public class Fighter_Input : MonoBehaviour
 
     void Update()
     {
-        //Reduces hitstop duration if the fighter is currently in hitstop.
+        //Hitstop - If fighter is in hitstop, countdown hitstop duration
         if(hitStopTime > 0)
         {
-            hitStopTime = Mathf.Clamp(hitStopTime - Time.deltaTime * 60f,0,100); //Reduce hitstop duration by frames
+            //Reduce hitstop duration by frames, but don't reduce past 0
+            hitStopTime = Mathf.Clamp(hitStopTime - Time.deltaTime * 60f,0,100); 
+            //Once hitstop equals zero, unfreeze movement and animations
             if (hitStopTime == 0)
             {
                 F_Mov.FreezeMovement(false);
@@ -114,9 +117,10 @@ public class Fighter_Input : MonoBehaviour
             }
         }
         
-        //Reduce duration of hitstun and blockstun
-        if(hitStopTime == 0 && (F_State == FighterState.HITSTUN || F_State == FighterState.BLOCK) && hitStopTime == 0)
+        //If not in hitstop, reduce duration of hitstun and blockstun
+        if(hitStopTime == 0 && (F_State == FighterState.HITSTUN || F_State == FighterState.BLOCK))
         {
+            //Reduce stuntime. If zero or less, change state to neutral and reset stunTime
             stunTime -= Time.deltaTime;
             if(stunTime <= 0)
             {
@@ -126,21 +130,21 @@ public class Fighter_Input : MonoBehaviour
         }
 
         //Get current stick directions and button inputs, then convert stick input to jump input and axis directions 
-        UpdateStick();
-        UpdateButtons();
-        UpdateJoystickAxes();
+        UpdateStick(); //Sets stick position based on phone numpad code (1-9)
+        UpdateButtons(); //Sets press state of A, B, and C buttons, as well as how long the button has(n't) been pressed.
+        UpdateJoystickAxes(); //Sets the X and Y axes of each stick (-1, 0, 1)
 
         //Update the direction the character is facing
         UpdateFacing();
 
-        //Update animator stick inputs
+        //Update animator stick inputs based on axis
         AR.SetInteger("Horiz_Input", Relative_X());
-        AR.SetInteger("Vert_Input", Stick_Y);        
+        AR.SetInteger("Vert_Input", Stick_Y);
 
-        //Standard Movement if fighter is in neutral state and not in hitstop
+        //Standard Movement - Move the fighter if fighter is in neutral state and not in hitstop
         if (F_State == FighterState.NEUTRAL && hitStopTime == 0)
         {
-            //Set Jump animator trigger if needed
+            //If grounded and receiving a jump input, set jump animator trigger
             if (jump && Get_IsGrounded())
             {
                 F_AnimCtrl.SetTrigger("Jump");
@@ -148,39 +152,43 @@ public class Fighter_Input : MonoBehaviour
             }
 
             //Manually move the player, if they are able to be controlled
-            F_Mov.Standard_Movement(Stick_X, Stick_Y, jump);
+            F_Mov.Standard_Movement_Update(Stick_X, Stick_Y, jump);
 
-            //Check which command inputs, if any, the player has generated (Should this still only be called when not in hitstop?)
+            //Activate animator triggers for each button (Should this still only be called when not in hitstop?)
             F_Atk.CheckMoveList(APressed, ADuration, BPressed, BDuration, CPressed, CDuration);
         }
+        //If in attack state and not in hitstop, allow animation keyframes to move the fighter
         else if(F_State == FighterState.ATTACK && hitStopTime == 0)
         {
             F_Mov.SetMovementByAnimator();
         }
 
-        //Update speed based on gravity UNLESS fighter is in hitstop or animating with keyframes.
+        //Update vertical speed based on gravity UNLESS fighter is in hitstop or animating with keyframes (in which case gravity is off).
         if(hitStopTime == 0 && gravityOn)
             F_Mov.Gravity_Update();
 
-        //Update player movement if the current fighter cannot back up
+        //Limit player's horizontal movement if the current fighter cannot back up
         if (!CanBackUp)
         {
             F_Mov.WallMovement(onRight);
             F_Mov.Touching_Wall(!onRight);
         }
-        //Update animator movement variables
+
+        //Update animator movement variables that are based on speed
         AR.SetFloat("XSpeed", F_Mov.Get_SpeedX());
         AR.SetFloat("YSpeed", F_Mov.Get_SpeedY());
     }
 
-    #region //[2] Trigger functions
+    #region //[2] Trigger functions - Activate when touching or moving away from the wall
     private void OnTriggerEnter2D(Collider2D collision)
     {
+        //If backed against the wall for the first time, tell the fighter they are touching the wall. Relative to direction faced.
         if ((collision.gameObject.CompareTag("LeftWall") && !facingLeft) || (collision.gameObject.CompareTag("RightWall") && facingLeft))
             touchingWall = (facingLeft ? 1 : -1);
     }
     private void OnTriggerExit2D(Collider2D collision)
     {
+        //When moving away from a wall, reset touching wall trait
         if (collision.gameObject.CompareTag("LeftWall") || collision.gameObject.CompareTag("RightWall"))
             touchingWall = 0;
     }
@@ -191,8 +199,8 @@ public class Fighter_Input : MonoBehaviour
     /// <summary> Updates player facing and sprite/hurtbox flip based on their relative position and ground state. </summary>
     private void UpdateFacing()
     {
-        //Set facing direction if on ground and direction has changed 
-        if (facingLeft != onRight && F_Mov.grounded)
+        //Set facing direction when direction changes if on the ground and in an actionable state
+        if (facingLeft != onRight && F_Mov.grounded && F_State == FighterState.NEUTRAL)
             facingLeft = onRight;
         
         //Update sprite renderer and hurtbox based on results
@@ -203,7 +211,7 @@ public class Fighter_Input : MonoBehaviour
     /// <summary> Updates the fighters On_Right variables, and whether the fighter can back up </summary>
     public void UpdateRelativePositionValues()
     {
-        //Update relative position parameters
+        //Update relative position parameters based on opponent's position
         if (transform.position.x > Opponent.transform.position.x && !onRight)
             Set_OnRight(true);
         else if (transform.position.x < Opponent.transform.position.x && onRight)
@@ -222,33 +230,35 @@ public class Fighter_Input : MonoBehaviour
     /// <summary> Tracks joystick position and duration, sets numerical position </summary>
     public void UpdateStick()
     {
-        //Read player inputs
+        //Read player inputs, to set the numerical value of the input (1-9)
         pos_changed = false;
         int new_Pos = 5;
         if (Input.GetKey(LEFT)) new_Pos--; if (Input.GetKey(RIGHT)) new_Pos++;
         if (Input.GetKey(UP)) new_Pos += 3; if (Input.GetKey(DOWN)) new_Pos -= 3;
 
-        //Update stick position save if position changed
+        //If the stick's position has changed, store the new stick position and reset stick position.
         if(new_Pos != stickPos)
         {
             priorStickPos = stickPos;
             stickPos = new_Pos;
             pos_duration = 0;
-            pos_changed = true;
+            pos_changed = true; //Tels the game the stick's position changed that frame.
         }
-        else
+        else //If stick position not changed, count upt the dutation the stick has been held (max of 3)
         {
             pos_duration = Mathf.Clamp(pos_duration + Time.deltaTime,0,3);
         }
     }
+
     /// <summary> Check when face buttons are pressed / released, tracks input duration </summary>
     public void UpdateButtons()
     {
         //Increase time buttons have been in the current state, up to 3 seconds
-        ADuration = Mathf.Clamp(ADuration+Time.deltaTime,0,3);
+        ADuration = Mathf.Clamp(ADuration + Time.deltaTime, 0, 3);
         BDuration = Mathf.Clamp(BDuration + Time.deltaTime, 0, 3);
+        CDuration = Mathf.Clamp(CDuration + Time.deltaTime, 0, 3);
 
-        //Check if each button has just been pressed or released
+        //Check if each button has just been pressed or released - if yes, reset duration and change state
         if (Input.GetKeyDown(A)) { APressed = true; ADuration = 0; }
         else if(Input.GetKeyUp(A)) { APressed = false; ADuration = 0; }
 
@@ -258,19 +268,24 @@ public class Fighter_Input : MonoBehaviour
         if (Input.GetKeyDown(C)) { CPressed = true; CDuration = 0; }
         else if (Input.GetKeyUp(C)) { CPressed = false; CDuration = 0; }
     }
+    
     /// <summary> Sets Joystick X and Y axes, and generates jump inputs </summary>
     private void UpdateJoystickAxes()
     {
+        //For the X and Y input, set whether it is positive, negative, or neutral.
         Stick_X = 0; Stick_Y = 0;
         if (stickPos % 3 == 0) Stick_X = 1; else if (stickPos % 3 == 1) Stick_X = -1;
         if (stickPos <= 3) Stick_Y = -1; else if (stickPos >= 7) Stick_Y = 1;
 
+        //If stick Y axis switched from down / neutral to up, generate jump input.
         jump = (pos_changed && Stick_Y > 0 && priorStickPos < 7);
     }
+    
     /// <summary> Determines if fighter is holding forward or back relative to direction they're facing </summary>
     /// <returns> X Axis integer (-1, 0, 1) </returns>
     private int Relative_X()
     {
+        //If fighter is holding back relative to direction they are facing, return -1. If holding forward, return 1.
         return facingLeft ? -Stick_X : Stick_X;
     }
     #endregion
@@ -300,10 +315,8 @@ public class Fighter_Input : MonoBehaviour
                     F_State = FighterState.BLOCK;
                     //Set block trigger
                     F_AnimCtrl.SetTrigger("Block");
-                    //AR.SetTrigger("Block");
-                    //F_AnimCtrl.Block_AnimTimer = 6;
                 }
-                //Neutral >> Attack
+                //Neutral >> Attack; also stop horizontal movement if used on the ground
                 else if (newState == FighterState.ATTACK)
                 {
                     F_State = FighterState.ATTACK;
@@ -312,7 +325,7 @@ public class Fighter_Input : MonoBehaviour
                 }
                 break;
 
-            case FighterState.ATTACK: //Disable Hitbox if it already exists
+            case FighterState.ATTACK: //When switching away from attack state, disable personal hitbox if acitve
                 //Attack >> Neutral
                 if (newState == FighterState.NEUTRAL)
                 {
@@ -340,7 +353,6 @@ public class Fighter_Input : MonoBehaviour
                     F_State = FighterState.NEUTRAL;
                     //Set recovery trigger
                     F_AnimCtrl.SetTrigger("Hurt_Recover");
-                    //AR.SetTrigger("Hurt_Recover");
                 }
                 //Hitstun >> Tumble
                 else if (newState == FighterState.TUMBLE)
@@ -364,8 +376,6 @@ public class Fighter_Input : MonoBehaviour
                     F_State = FighterState.NEUTRAL;
                     //Set unblock trigger
                     F_AnimCtrl.SetTrigger("Unblock");
-                    //AR.SetTrigger("Unblock");
-                    //F_AnimCtrl.Unblock_AnimTimer = 6;
                 }
                 break;
 
@@ -395,8 +405,8 @@ public class Fighter_Input : MonoBehaviour
     /// <param name="HB_Data"></param> <param name="hitbox_facing_right"></param> <param name="Attacker"></param>
     public void Damaged(SO_Hitbox HB_Data, bool hitbox_facing_right, Fighter_Input Attacker)
     {
-        bool blocked_attack = false;
         //Determine whether the attack was blocked or not
+        bool blocked_attack = false;
         if(Relative_X() < 0)
             blocked_attack = true;
 
@@ -406,7 +416,7 @@ public class Fighter_Input : MonoBehaviour
             //Deduct health
             F_Stats.Take_Damage(HB_Data.HB_damage);
 
-            //Reset any animator movement alterations
+            //Reset any movement effects applied by animator
             F_Mov.ANIMATOR_ResetAnimMovement();
 
             //If hit on the ground, change fighter state to hitstun, and set duration of the stun
@@ -420,16 +430,15 @@ public class Fighter_Input : MonoBehaviour
                 else
                     Change_State(FighterState.TUMBLE);
             }
-            //If hit in the air, change to tumble state until the fighter lands
+            //But if hit in the air, change to tumble state instead. Lasts until the fighter lands
             else if(!Get_IsGrounded())
-            {
                 Change_State(FighterState.TUMBLE);
-            }
+
             //if the hitbox is a no_grav hitbox, turn off gravity
             if (HB_Data.HB_LaunchProperty == HitboxLaunch.NO_GRAV)
                 Set_GravityOn(false);
 
-            //Tell Fighter_Mov whether the character is in a bounce state
+            //Tell Fighter_Mov whether the character is in a ground or wall bounce state
             if (HB_Data.HB_BounceProperty == HitboxBounceType.GROUND)
             {
                 F_Mov.Set_IsGBouncing(true);
@@ -438,7 +447,13 @@ public class Fighter_Input : MonoBehaviour
             else if (HB_Data.HB_BounceProperty == HitboxBounceType.WALL)
                 F_Mov.Set_IsWBouncing(true);
 
-            //Trigger the correct damage animation based on groundedness and crouch status
+            //Trigger the correct damage animation based on groundedness and crouch status:
+            /* If ground or wall bounced, start gravity-less launch effect
+             * If hit on the air by a non-launching attack, start aerial knockback animation
+             * If on the ground AND hit by a launching attack, use a special grounded-launch animation
+             * If on the ground and crouching, use crouch-damage animation
+             * In all other cases, use normal hitstun animation */
+
             if (HB_Data.HB_BounceProperty != HitboxBounceType.NONE)
                 AR.SetTrigger("Hurt_Launch_NoGrav");
             else if (!Get_IsGrounded())
@@ -450,16 +465,19 @@ public class Fighter_Input : MonoBehaviour
             else
                 AR.SetTrigger("Hurt_Grounded");
 
-            //Launch the fighter (using mov script)
+            //Call F_Mov script to launch the fighter
             F_Mov.Damage_Launch(HB_Data.HB_Knockback, hitbox_facing_right, HB_Data);
-            //Maybe perform a bounce check?
+            
+            //Bug check - ground bounce doesn't work when on the ground already. Maybe here begin special ground bounce?
 
-            //Push the attacker if against the wall
+            //If against the wall, push back the attacking fighter
             if(!CanBackUp && HB_Data.HB_BounceProperty != HitboxBounceType.WALL)
                 Attacker.Block_Pushback(HB_Data, hitbox_facing_right);
 
+            //Set the fighter's hitstop duration based on the attack received
             Set_HitStopTime(HB_Data.hitStop);
         }
+        
         //If the attack WAS blocked, play block animation and push the fighter
         if(blocked_attack)
         {
@@ -468,7 +486,7 @@ public class Fighter_Input : MonoBehaviour
             stunTime = HB_Data.blockStun / 60.0f;
             Set_HitStopTime(HB_Data.hitStop);
 
-            //Push self away, OR push the attacker if against the wall
+            //Push self away, or push the attacker instead if against the wall
             if(CanBackUp)
                 F_Mov.Damage_Launch(HB_Data.HB_Knockback, hitbox_facing_right, HB_Data);
             else
@@ -480,7 +498,8 @@ public class Fighter_Input : MonoBehaviour
     /// <param name="HB_Data"></param> <param name="hb_facing_right"></param>
     public void Block_Pushback(SO_Hitbox HB_Data, bool hb_facing_right)
     {
-        if(Get_IsGrounded()) //May check if grounded before defender calls this method
+        //May check if grounded before defender calls this method
+        if (Get_IsGrounded()) 
         {
             //Always pushes back along the x only - distance is based on magnitude of attack's normal knockback
             F_Mov.Damage_Launch(Vector3.right*HB_Data.HB_Knockback.magnitude, !hb_facing_right, HB_Data);
@@ -490,18 +509,14 @@ public class Fighter_Input : MonoBehaviour
     #endregion
 
     #region//[2] Set Functions, used to set variables without exposing them
-    /// <summary>
-    /// Sets whether the fighter is further to the right than their opponent
-    /// </summary>
+    /// <summary> Sets whether the fighter is further to the right than their opponent </summary>
     /// <param name="isOnRight"></param>
     public void Set_OnRight(bool isOnRight)
     {
         onRight = isOnRight;
     }
-    /// <summary>
-    /// Sets the duration of time the player is in hitstop for, and activates the hitstop.
-    /// Called by the Damage script when taking damage, and by the hitbox when dealing damage
-    /// </summary>
+    /// <summary> Sets the duration of time the player is in hitstop for, and activates the hitstop.
+    /// Called by the Damage script when taking damage, and by the hitbox when dealing damage </summary>
     /// <param name="stopTime"></param>
     public void Set_HitStopTime(float stopTime)
     {
@@ -513,11 +528,15 @@ public class Fighter_Input : MonoBehaviour
         }
     }
 
+    /// <summary> Toggles whether the fighter has its gravity active or not. </summary>
+    /// <param name="G"></param>
     public void Set_GravityOn(bool G)
     {
         gravityOn = G;
     }
 
+    /// <summary> Sets whether the fighter's hurtboxes are currently active. Calls method on Fighter_HitDetection. </summary>
+    /// <param name="isVulnerable"></param>
     public void Set_Vulnerability_F_HitDet(bool isVulnerable)
     {
         F_HitDet.SetVulnStatus(isVulnerable);
@@ -545,7 +564,6 @@ public class Fighter_Input : MonoBehaviour
     {
         return F_State;
     }
-
     public Fighter_Attack Get_FAtk()
     {
         return F_Atk;
